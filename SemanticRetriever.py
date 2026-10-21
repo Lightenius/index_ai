@@ -1,4 +1,5 @@
-
+import os
+import pickle
 from typing import Any
 
 import numpy as np
@@ -13,6 +14,7 @@ class SemanticRetriever:
         overlap: int = 60,
         batch_size: int = 8,
         device: str | None = None,
+        db_path: str = "semantic_db.pkl",
     ):
         """
         Initialize the semantic retriever.
@@ -23,6 +25,7 @@ class SemanticRetriever:
             overlap: Number of overlapping tokens between passages.
             batch_size: Number of passages embedded per batch.
             device: "cpu", "cuda", or None for automatic selection.
+            db_path: Path to save and load the indexed data.
         """
         if chunk_size < 1:
             raise ValueError("chunk_size must be positive.")
@@ -35,10 +38,52 @@ class SemanticRetriever:
         self.chunk_size = chunk_size
         self.overlap = overlap
         self.batch_size = batch_size
+        self.db_path = db_path
 
         # Cached passages and their normalized embeddings.
         self._passages: list[dict[str, Any]] = []
         self._embeddings: np.ndarray | None = None
+
+    def _load_db(self, target_filenames: set[str]) -> tuple[list[dict], np.ndarray | None]:
+        """
+        Loads the database from disk and filters out files that are no longer present.
+        """
+        if not os.path.exists(self.db_path):
+            return [], None
+        
+        try:
+            with open(self.db_path, "rb") as f:
+                data = pickle.load(f)
+                db_passages = data.get("passages", [])
+                db_embeddings = data.get("embeddings", None)
+        except Exception as e:
+            print(f"Warning: Failed to load semantic DB ({e}). Starting fresh.")
+            return [], None
+
+        # Filter out passages for files that were removed
+        kept_indices = [
+            i for i, p in enumerate(db_passages) 
+            if p.get("filename") in target_filenames
+        ]
+        
+        kept_passages = [db_passages[i] for i in kept_indices]
+        
+        if db_embeddings is not None and len(kept_indices) > 0:
+            kept_embeddings = db_embeddings[kept_indices]
+        else:
+            kept_embeddings = None
+            
+        return kept_passages, kept_embeddings
+
+    def _save_db(self) -> None:
+        """
+        Overwrites the database on disk with the current passages and embeddings.
+        """
+        with open(self.db_path, "wb") as f:
+            pickle.dump({
+                "passages": self._passages,
+                "embeddings": self._embeddings
+            }, f)
 
     def _make_passages(
         self,
@@ -113,24 +158,51 @@ class SemanticRetriever:
         Returns:
             Number of passages indexed.
         """
-        passages = self._make_passages(pdf_data)
+        target_filenames = set()
+        for pdf in pdf_data:
+            fname = pdf.get("filename")
+            if isinstance(fname, str) and fname.strip():
+                target_filenames.add(fname)
 
-        if not passages:
-            self._passages = []
+        # Load existing data, omitting anything no longer in target_filenames
+        kept_passages, kept_embeddings = self._load_db(target_filenames)
+
+        # Identify files that need to be processed (not present in the loaded cache)
+        existing_filenames = set(p.get("filename") for p in kept_passages)
+        new_pdfs = [
+            pdf for pdf in pdf_data 
+            if pdf.get("filename") in target_filenames and pdf.get("filename") not in existing_filenames
+        ]
+
+        # Generate passages and embeddings for new files
+        new_passages = self._make_passages(new_pdfs)
+        new_embeddings = None
+
+        if new_passages:
+            new_embeddings = self.model.encode(
+                [p["content"] for p in new_passages],
+                batch_size=self.batch_size,
+                normalize_embeddings=True,
+                convert_to_numpy=True,
+                show_progress_bar=show_progress_bar,
+            )
+
+        # Merge old and new data
+        self._passages = kept_passages + new_passages
+
+        if kept_embeddings is not None and new_embeddings is not None:
+            self._embeddings = np.vstack([kept_embeddings, new_embeddings])
+        elif kept_embeddings is not None:
+            self._embeddings = kept_embeddings
+        elif new_embeddings is not None:
+            self._embeddings = new_embeddings
+        else:
             self._embeddings = None
-            return 0
 
-        embeddings = self.model.encode(
-            [p["content"] for p in passages],
-            batch_size=self.batch_size,
-            normalize_embeddings=True,
-            convert_to_numpy=True,
-            show_progress_bar=show_progress_bar,
-        )
+        # Save back to disk
+        self._save_db()
 
-        self._passages = passages
-        self._embeddings = embeddings
-        return len(passages)
+        return len(self._passages)
 
     def retrieve(
         self,
