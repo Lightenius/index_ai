@@ -5,7 +5,6 @@ import json
 import re
 import uuid
 import threading
-
 import datetime
 
 import pymupdf
@@ -107,13 +106,157 @@ def belge_sil(belge_id):
         return True
 
 
+# --------------------------------------------------
+# TABLO İŞLEMLERİ
+# --------------------------------------------------
+
+def tabloyu_markdown_yap(tablo):
+    """
+    PDF tablosunu Markdown formatına dönüştürür.
+    """
+
+    satirlar = tablo.extract()
+
+    if not satirlar:
+        return ""
+
+    temiz_satirlar = []
+
+    for satir in satirlar:
+        temiz = [
+            str(hucre or "")
+            .replace("\n", " ")
+            .replace("|", "\\|")
+            .strip()
+            for hucre in satir
+        ]
+
+        temiz_satirlar.append(temiz)
+
+    sutun_sayisi = max(
+        len(satir) for satir in temiz_satirlar
+    )
+
+    if sutun_sayisi < 2:
+        return ""
+
+    for satir in temiz_satirlar:
+        satir.extend(
+            [""] * (sutun_sayisi - len(satir))
+        )
+
+    baslik = temiz_satirlar[0]
+    govde = temiz_satirlar[1:]
+
+    satir_metni = [
+        "| " + " | ".join(baslik) + " |",
+        "| " + " | ".join(
+            ["---"] * sutun_sayisi
+        ) + " |"
+    ]
+
+    for satir in govde:
+        satir_metni.append(
+            "| " + " | ".join(satir) + " |"
+        )
+
+    return "\n".join(satir_metni)
+
+
+def sayfa_metnini_cikar(sayfa):
+    """
+    PDF sayfasındaki normal metinleri ve tabloları
+    konumlarına göre birleştirir.
+    """
+
+    tablo_bilgileri = []
+
+    try:
+        bulunan_tablolar = sayfa.find_tables()
+
+        for tablo in bulunan_tablolar.tables:
+            markdown = tabloyu_markdown_yap(tablo)
+
+            if markdown:
+                tablo_bilgileri.append({
+                    "bbox": tuple(tablo.bbox),
+                    "metin": markdown
+                })
+
+    except Exception as hata:
+        print(
+            f"Tablo algılama hatası: {hata}"
+        )
+
+    bloklar = sayfa.get_text("blocks")
+
+    icerikler = []
+
+    for blok in bloklar:
+        x0, y0, x1, y1 = blok[:4]
+
+        metin = str(blok[4]).strip()
+
+        if not metin:
+            continue
+
+        blok_alani = pymupdf.Rect(
+            x0, y0, x1, y1
+        )
+
+        tablo_ile_kesisiyor = any(
+            blok_alani.intersects(
+                pymupdf.Rect(tablo["bbox"])
+            )
+            for tablo in tablo_bilgileri
+        )
+
+        if tablo_ile_kesisiyor:
+            continue
+
+        icerikler.append({
+            "y": y0,
+            "x": x0,
+            "metin": metin
+        })
+
+    for tablo in tablo_bilgileri:
+        icerikler.append({
+            "y": tablo["bbox"][1],
+            "x": tablo["bbox"][0],
+            "metin": tablo["metin"]
+        })
+
+    icerikler.sort(
+        key=lambda icerik: (
+            icerik["y"],
+            icerik["x"]
+        )
+    )
+
+    return "\n\n".join(
+        icerik["metin"]
+        for icerik in icerikler
+    )
+
+
+# --------------------------------------------------
+# PDF OKUMA
+# --------------------------------------------------
+
 @st.cache_data(show_spinner=False, max_entries=128)
 def pdf_oku(dosya_yolu, dosya_hash):
     sayfalar = []
 
     with pymupdf.open(dosya_yolu) as pdf:
-        for numara, sayfa in enumerate(pdf, start=1):
-            metin = sayfa.get_text("text").strip()
+        for numara, sayfa in enumerate(
+            pdf,
+            start=1
+        ):
+
+            metin = sayfa_metnini_cikar(
+                sayfa
+            ).strip()
 
             if metin:
                 sayfalar.append({
@@ -124,11 +267,23 @@ def pdf_oku(dosya_yolu, dosya_hash):
     return sayfalar
 
 
+# --------------------------------------------------
+# KELİME EŞLEŞTİRME
+# --------------------------------------------------
+
 def kelimeler(metin):
-    return set(re.findall(r"[^\W_]+", metin.casefold()))
+    return set(
+        re.findall(
+            r"[^\W_]+",
+            metin.casefold()
+        )
+    )
 
 
-def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
+def kelime_arama(soru, top_k=50):
+    """Mevcut kelime puanlamas?yla ortak formatta aday par?alar d?nd?r?r."""
+    if top_k <= 0:
+        return []
     gereksiz = {
         "ve", "veya", "ile", "bir", "bu", "şu",
         "için", "bana", "göre", "olan", "nedir",
@@ -141,61 +296,110 @@ def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
     aranan = kelimeler(soru) - gereksiz
 
     if not aranan:
-        return ""
+        return []
 
     sonuclar = []
 
     for belge in belgeleri_getir():
         try:
-            print("Belge getirme işlemi başladı - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
-            
+            print(
+                "Belge getirme işlemi başladı - "
+                + str(
+                    datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).timestamp()
+                )
+            )
+
             sayfalar = pdf_oku(
                 belge["dosya_yolu"],
                 belge["hash"]
             )
 
-            dosya_kelimeleri = kelimeler(belge["ad"]) - gereksiz
-            print("Nokta 1 - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
+            dosya_kelimeleri = (
+                kelimeler(belge["ad"]) - gereksiz
+            )
+
+            print(
+                "Nokta 1 - "
+                + str(
+                    datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).timestamp()
+                )
+            )
+
             for sayfa in sayfalar:
                 metin = sayfa["metin"]
-                print("Nokta 2 - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
 
-                for baslangic in range(0, len(metin), 1200):
-                    parca = metin[baslangic:baslangic + 1200]
+                print(
+                    "Nokta 2 - "
+                    + str(
+                        datetime.datetime.now(
+                            datetime.timezone.utc
+                        ).timestamp()
+                    )
+                )
 
-                    puan = len(aranan & kelimeler(parca))
+                for baslangic in range(
+                    0,
+                    len(metin),
+                    1200
+                ):
+                    parca = metin[
+                        baslangic:baslangic + 1200
+                    ]
+
+                    puan = len(
+                        aranan & kelimeler(parca)
+                    )
 
                     if aranan & dosya_kelimeleri:
                         puan += 3
 
                     if puan > 0:
                         sonuclar.append({
+                            "pdf_id": belge["id"],
+                            "chunk_id": f"{belge['id']}_{sayfa['sayfa']}_{baslangic}",
+                            "page": sayfa["sayfa"],
+                            "text": parca,
                             "puan": puan,
                             "ad": belge["ad"],
                             "sayfa": sayfa["sayfa"],
                             "metin": parca
                         })
-            print("Nokta 3 - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
+
+            print(
+                "Nokta 3 - "
+                + str(
+                    datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).timestamp()
+                )
+            )
 
         except Exception as hata:
-            print(f"PDF okunamadı: {belge['ad']} - {hata}")
-            print("Nokta 4 - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
+            print(
+                f"PDF okunamadı: "
+                f"{belge['ad']} - {hata}"
+            )
+
+            print(
+                "Nokta 4 - "
+                + str(
+                    datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).timestamp()
+                )
+            )
 
     sonuclar.sort(
         key=lambda sonuc: sonuc["puan"],
         reverse=True
     )
 
-    metinler = []
-    print("Nokta 5 - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
+    return sonuclar[:top_k]
 
-    for sonuc in sonuclar[:maksimum_bolum]:
-        metinler.append(
-            f"Dosya: {sonuc['ad']}\n"
-            f"Sayfa: {sonuc['sayfa']}\n"
-            f"{sonuc['metin']}"
-        )
-    print("Nokta 6 (Tamamlandı) - " + str(datetime.datetime.now(datetime.timezone.utc).timestamp()))
 
     return "\n\n---\n\n".join(metinler)
 
@@ -231,3 +435,11 @@ def get_pdf_dicts():
         sonuc_listesi.append(pdf_verisi)
         
     return sonuc_listesi
+def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
+    """Eski metin aray?z?n? korur; puanlama kelime_arama ile ortakt?r."""
+    return "\n\n---\n\n".join(
+        f"Dosya: {sonuc['ad']}\n"
+        f"Sayfa: {sonuc['page']}\n"
+        f"{sonuc['text']}"
+        for sonuc in kelime_arama(soru, top_k=maksimum_bolum)
+    )
