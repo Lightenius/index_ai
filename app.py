@@ -436,7 +436,7 @@ Düzgün bir türkçe kullan. Terimleri ise çevirmeden, orjinal dillerinde yaz.
 
 İlgili doküman bölümleri:
 {bolumler if bolumler else "İlgili bölüm bulunamadı."}
-"""
+"""}
                                 
                                 onceki_mesajlar = sohbet_bul(
                                     aktif_id
