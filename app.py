@@ -18,6 +18,12 @@ from documents import (
     ilgili_bolumleri_bul
 )
 
+import documents
+import SemanticRetriever
+pdf_dicts = documents.get_pdf_dicts()
+retriever = SemanticRetriever.SemanticRetriever()
+retriever.index(pdf_dicts)
+print("Semantik indexleme tamamlandı.")
 
 st.set_page_config(
     page_title="Şirket AI",
@@ -400,12 +406,9 @@ with sohbet_tab:
                             with st.spinner("Yanıt hazırlanıyor..."):
                                 #ilgili = ilgili_bolumleri_bul(soru)
                                 
-                                import documents
-                                import SemanticRetriever
-                                pdf_dicts = documents.get_pdf_dicts()
-                                retriever = SemanticRetriever.SemanticRetriever()
-                                retriever.index(pdf_dicts)
+
                                 bols = retriever.retrieve(soru, 20)
+                                print("Semantik arama gerçekleştirildi")
                                 bolumler = ""
 
                                 for bol in bols:
