@@ -15,8 +15,11 @@ from documents import (
     belgeleri_getir,
     belge_ekle,
     belge_sil,
-    ilgili_bolumleri_bul
+    kelime_arama
 )
+
+from reranker import Reranker
+from context import sayfalari_genislet, baglam_hazirla, baglami_txt_kaydet
 
 
 st.set_page_config(
@@ -32,6 +35,33 @@ sohbet_dosyasi = klasor / "chats.json"
 client = Client(host="http://127.0.0.1:11434")
 
 sohbet_kilidi = threading.RLock()
+
+
+@st.cache_resource(show_spinner=False)
+def reranker_getir():
+    return Reranker()
+
+
+def kaynak_hazirla(soru):
+    adaylar = kelime_arama(soru, top_k=50)
+    print("Reranker aday sayisi:", len(adaylar))
+    siralanmis = reranker_getir().sirala(soru, adaylar, top_k=15) if adaylar else []
+    print("Reranker sonuc sayisi:", len(siralanmis))
+    with open(klasor / "reranker_sonuclari.txt", "w", encoding="utf-8") as dosya:
+        dosya.write(f"SORU: {soru}\n\n")
+        for sira, sonuc in enumerate(siralanmis, start=1):
+            dosya.write(
+                f"SONUC {sira}\nPDF ID: {sonuc['pdf_id']}\n"
+                f"Chunk ID: {sonuc['chunk_id']}\nSayfa: {sonuc['page']}\n"
+                f"Puan: {sonuc['rerank_score']:.6f}\nMetin:\n{sonuc['text']}\n"
+                + "-" * 50 + "\n\n"
+            )
+    sayfalar = sayfalari_genislet(siralanmis, komsu=1)
+    print("Context secilen sayfa sayisi:", len(sayfalar))
+    baglam = baglam_hazirla(sayfalar, max_karakter=16000)
+    print("Ollama kaynak metni karakter sayisi:", len(baglam))
+    baglami_txt_kaydet(soru, baglam)
+    return baglam
 
 
 # ARAYÜZ
@@ -398,7 +428,7 @@ with sohbet_tab:
 
                         else:
                             with st.spinner("Yanıt hazırlanıyor..."):
-                                ilgili = ilgili_bolumleri_bul(soru)
+                                ilgili = kaynak_hazirla(soru)
 
                                 sistem_mesaji = {
                                     "role": "system",
@@ -469,6 +499,7 @@ Düzgün bir türkçe kullan. Terimleri ise çevirmeden, orjinal dillerinde yaz.
 
                     except Exception as hata:
                         st.error(f"Bağlantı hatası: {hata}")
+                        st.stop()
 
             st.rerun()
 
