@@ -20,6 +20,7 @@ from documents import (
 
 import documents
 import SemanticRetriever
+print("Semantik indexleme başladı.")
 pdf_dicts = documents.get_pdf_dicts()
 retriever = SemanticRetriever.SemanticRetriever()
 retriever.index(pdf_dicts)
