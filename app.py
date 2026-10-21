@@ -18,13 +18,7 @@ from documents import (
     ilgili_bolumleri_bul
 )
 
-import documents
-import SemanticRetriever
-print("Semantik indexleme başladı.")
-pdf_dicts = documents.get_pdf_dicts()
-retriever = SemanticRetriever.SemanticRetriever()
-retriever.index(pdf_dicts)
-print("Semantik indexleme tamamlandı.")
+import retrieving
 
 st.set_page_config(
     page_title="Şirket AI",
@@ -408,12 +402,10 @@ with sohbet_tab:
                                 #ilgili = ilgili_bolumleri_bul(soru)
                                 
 
-                                bols = retriever.retrieve(soru, 20)
-                                print("Semantik arama gerçekleştirildi")
-                                bolumler = ""
+                                print(f"Retrieving for query: {soru}", flush=True)
+                                bolumler = retrieving.retrieve_for(soru, 10)
 
-                                for bol in bols:
-                                    bolumler += "\n--- File: " + bol["filename"] + " | Page :" + bol["page_number"] + " ---\n" + bol["content"] + "\n--- END of PASSAGE ---\n"
+
                                 
                                 sistem_mesaji = {
                                     "role": "system",
