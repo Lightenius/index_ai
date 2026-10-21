@@ -1,14 +1,50 @@
 [
   {
-    "id": "533000bc037e4fdcb0dff833d8503fac",
-    "baslik": "Axxon One ne işe yarıyor",
+    "id": "414b068bd92c41e7b7634856c45e937d",
+    "baslik": "axxonNet nedir",
     "mesajlar": [
       {
         "role": "user",
-        "content": "Axxon One ne işe yarıyor"
+        "content": "axxonNet nedir"
+      },
+      {
+        "role": "assistant",
+        "content": "AxxonNet, Axxon One güvenlik sistemlerinin iletişim ve bildirim sistemini sağlayan bir bulut hizmettir. AxxonNet üzerinden Axxon One sistemi tarafından oluşturulan olayları (deteksiyonlar, uyarılar) e-posta, SMS ve mobil uygulamalar üzerinden bildirim olarak gönderilebilir.\n\nAxxonNet ile ilgili dokümanlar:\n- AxxonNet Setup and Operation (Sayfa 567)\n- Connecting Axxon-domain to AxxonNet (Sayfa 577)"
+      },
+      {
+        "role": "user",
+        "content": "AxxonOne hangi güvenlik sistemleri ile entegre çalışabilir"
+      },
+      {
+        "role": "assistant",
+        "content": "AxxonOne, aşağıdaki güvenlik sistemleriyle entegre çalışabilir:\n\n1. **IP Kameralar** (ONVIF, RTSP protokolleri ile entegre edilebilir)\n2. **Dış Sistemlerden Olay Alımı** (access control, alarm sistemleri gibi)\n\nBu bilgiler AxxonOne User Guide'da **11.2.10 \"Receiving Events from External Systems\"** ve **11.2.2.6 \"Support for IP cameras\"** bölümlerinden alınmıştır."
+      },
+      {
+        "role": "user",
+        "content": "Receiving Events from External Systems\nbunu açıkla. ne gibi external sistemler"
+      },
+      {
+        "role": "assistant",
+        "content": "AxxonOne, dış sistemlerden gerçek zamanlı olayları alarak kamera videolarıyla ilişkilendirerek analiz edebilir. Bu entegrasyon için aşağıdaki dış sistemler kullanılabilir:\n\n- Erişim kontrol sistemleri (örneğin, kart okuyucular, biyometrik sistemler)\n- Güvenlik ve yangın alarm sistemleri\n- Perimetre güvenlik sistemleri\n- POS (Point of Sale) cihazları (kasa sistemleri)\n- ACFA sistemleri\n\nBu bilgiler AxxonOne User Guide'daki **15.2.6 Receiving Events from External Systems** bölümünden alınmıştır."
+      },
+      {
+        "role": "user",
+        "content": "tümü bu mu yoksa başka da var mı,"
+      },
+      {
+        "role": "assistant",
+        "content": "Evet, bu listede tüm entegre edilebilen sistemler mevcuttur."
+      },
+      {
+        "role": "user",
+        "content": "Python scriptleri ile axxonone'a eklemeler yapabilir miyim"
+      },
+      {
+        "role": "assistant",
+        "content": "**Kendi Bilgimle:**  \nAxxonOne, genellikle REST API üzerinden dış sistemlerle entegre edilebilir. Python ile bu API'yi kullanarak olayları almak, konfigürasyonları değiştirmek veya veri akışını yönetmek mümkündür. Örneğin, `requests` kütüphanesiyle HTTP istekleri gönderilebilir.\n\n**Doküman Bilgisi:**  \nVerilen User Guide dosyalarında **Python ile doğrudan entegrasyon** hakkında özel bilgi bulunmamaktadır. Ancak AxxonOne'in **REST API** desteği ve **11.8 \"Ports used by the Axxon One Software Package\"** bölümünde belirtilen portlar üzerinden iletişim kurulabilir. Bu nedenle, Python scriptleri ile AxxonOne'a entegrasyon yapmak için resmi API belgelerini incelemek gerekmektedir.\n\n**Öneri:**  \nAxxonOne'in resmi API belgelerini (örneğin, [AxxonOne API Dokümanları](https://www.axxonsoft.com/support)) kontrol edin. Python ile REST API'yi kullanarak aşağıdaki işlemler yapılabilir:  \n- Olayları almak (event reception)  \n- Konfigürasyonları güncellemek  \n- Veri akışını yönetmek  \n\nDokümanlarda bu konuda detaylı bilgi yoksa, bu işlemi yapmak için AxxonOne destek ekibi ile iletişime geçin."
       }
     ],
-    "tarih": "2026-10-21T14:31:51"
+    "tarih": "2026-10-21T15:34:32"
   },
   {
     "id": "c37e24d5f09a4f008101ede69d00433d",
