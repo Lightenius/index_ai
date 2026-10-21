@@ -8,6 +8,8 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
+import retrieving, SemanticRetriever
+
 import streamlit as st
 from ollama import Client
 
@@ -15,12 +17,16 @@ from documents import (
     belgeleri_getir,
     belge_ekle,
     belge_sil,
-    kelime_arama
+    kelime_arama,
+    get_pdf_dicts
 )
 
 from reranker import Reranker
 from context import sayfalari_genislet, baglam_hazirla, baglami_txt_kaydet
 
+ret = SemanticRetriever.SemanticRetriever()
+ret.index(get_pdf_dicts())
+print("Semantik indexleme tamamlandı")
 
 st.set_page_config(
     page_title="Şirket AI",
@@ -44,6 +50,10 @@ def reranker_getir():
 
 def kaynak_hazirla(soru):
     adaylar = kelime_arama(soru, top_k=50)
+    anlam = retrieving.retrieve_for(soru, 50)
+
+    adaylar.extend(anlam)
+
     print("Reranker aday sayisi:", len(adaylar))
     siralanmis = reranker_getir().sirala(soru, adaylar, top_k=15) if adaylar else []
     print("Reranker sonuc sayisi:", len(siralanmis))

@@ -1,7 +1,7 @@
 from SemanticRetriever import *
 import documents
 
-def retrieve_for(q: str, result_count: int = 5) -> str:
+def retrieve_for(q: str, result_count: int = 5) -> list:
     # 1. Initialize the retriever
     # Note: "BAAI/bge-m3" is a strong multilingual model, but you can 
     # swap it with "all-MiniLM-L6-v2" for faster CPU performance.
@@ -25,13 +25,15 @@ def retrieve_for(q: str, result_count: int = 5) -> str:
     query = q
     results = retriever.retrieve(prompt=query, top_k=result_count)
 
-    res = ""
+    res = []
 
     # 5. Process the results
     for i, result in enumerate(results, 1):
-        res += f"\n--- Result {i} (Similarity Score: {result['score']:.4f}) ---\n"
-        res += f"File: {result['filename']}\n"
-        res += f"Page: {result['page_number']}\n"
-        res += f"Content: {result['content']}\n"
+        res_item = ""
+        res_item += f"\n--- Result {i} (Similarity Score: {result['score']:.4f}) ---\n"
+        res_item += f"File: {result['filename']}\n"
+        res_item += f"Page: {result['page_number']}\n"
+        res_item += f"Content: {result['content']}\n"
+        res.append(res_item)
 
     return res
