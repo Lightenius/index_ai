@@ -1,0 +1,23 @@
+| templates/
+| | index.html
+| | interface.html
+| | ... diğer template dosyaları
+|
+| data/
+| | ... tüm veri dosyaları
+|
+| documents/
+| | ... tüm pdf dosyaları
+|
+| test/
+| | ... .py uzantılı test dosyaları
+|
+| app.py
+| input_handler.py
+| interface.py
+| pdf_parser.py
+| reranker.py
+| embedding.py
+| preprocessing.py
+| matcher.py
+| platform_calculator.py
