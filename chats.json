@@ -1,0 +1,71 @@
+[
+  {
+    "id": "c37e24d5f09a4f008101ede69d00433d",
+    "baslik": "axxon one sistemini rakiplerinden ayıran...",
+    "mesajlar": [
+      {
+        "role": "user",
+        "content": "axxon one sistemini rakiplerinden ayıran noktalar nelerdir"
+      },
+      {
+        "role": "assistant",
+        "content": "Axxon One, rakiplerinden ayıran temel özellikleri aşağıdaki gibi sıralanmıştır:\n\n1. **Mikromodül arşitektonüsü** (11.2.1)  \n   - Sistemde modüler yapı ile esnek ve ölçeklenebilir çözümler sağlar.\n\n2. **Cameralardan embedded video analizi** (11.2.2.4)  \n   - Kamera cihazlarında gerçek zamanlı analiz yapar, gecikme ve veri akışını azaltır.\n\n3. **360 derece kamera desteği** (11.2.2.5)  \n   - Tek bir kamera ile geniş alan kaplaması sağlar.\n\n4. **Multistreaming** (11.2.2.2)  \n   - Çoklu akış yönetimi ile yüksek trafiğe sahip sistemlerde verimliliği artırır.\n\n5. **GreenStream** (11.2.2.3)  \n   - Enerji verimliliği odaklı video işleme teknolojisi."
+      },
+      {
+        "role": "user",
+        "content": "Bir kamera modelinin axxon one tarafından desteklenip desteklenmediğini nasıl öğrenirim"
+      },
+      {
+        "role": "assistant",
+        "content": "Axxon One'da bir kamera modelinin desteklenip desteklenmediğini öğrenmek için aşağıdaki adımları izleyebilirsiniz:\n\n1. **Axxon One User Guide'da Drivers Pack bölümüne bakın** (11.2.2.1, Sayfa 39)  \n   - Burada desteklenen kamera modelleri listelenir.\n\n2. **Axxon One yazılım arayüzüne bakın** (eğer kurulum yapılmışsa)  \n   - Kamera eklerken otomatik olarak desteklenen modeller gösterilir.\n\nBu bilgiler, Axxon One User Guide'daki **Drivers Pack** bölümünden alınmıştır."
+      }
+    ],
+    "tarih": "2026-10-21T09:45:10"
+  },
+  {
+    "id": "1519bf03ae884432bc1aa43c6acf6982",
+    "baslik": "axxon one sistemini rakiplerinden ayıran...",
+    "mesajlar": [
+      {
+        "role": "user",
+        "content": "axxon one sistemini rakiplerinden ayıran noktalar nelerdir"
+      },
+      {
+        "role": "assistant",
+        "content": "Okay, the user is asking about what makes Axxon One different from competitors. Let me check the provided documents to see what's mentioned.\n\nFirst, looking at the User Guide PDF pages. On page 2, there's a section about the software package description, features, and the micromodule architecture. The sections 11.2.1 to 11.2.2.5 list features like Micromodule architecture, IP camera support, Drivers Pack, Multistreaming, GreenStream, embedded video analytics, and 360-degree camera support.\n\nThe user wants to know the points that set Axxon One apart from competitors. From the docs, the key features here are the micromodule architecture (which allows modular design), support for IP cameras with specific features like Drivers Pack, Multistreaming, GreenStream, embedded analytics, and 360-degree cameras. These are technical advantages that competitors might not have.\n\nI should list these points concisely. The answer should be short, as per the instructions. Also, make sure not to add extra info beyond the docs. The docs mention that Axxon One uses a micromodule architecture, which is a key differentiator. The other features like embedded analytics and 360-degree support are also unique selling points.\n\nWait, the user said \"rakiplerinden ayıran noktalar\" which translates to \"points that distinguish it from competitors\". So I need to pick the features that are unique to Axxon One as per the docs. The docs don't explicitly say \"unique\" but the features listed here are part of Axxon One's capabilities.\n\nSo the answer would be: Axxon One"
+      }
+    ],
+    "tarih": "2026-10-21T09:39:29"
+  },
+  {
+    "id": "67e15cafde26469a99297b445a132114",
+    "baslik": "otomatik ip kamera bulma sistemi düzgün ...",
+    "mesajlar": [
+      {
+        "role": "user",
+        "content": "otomatik ip kamera bulma sistemi düzgün çalışmıyor. Listede eksikler var. Ne yapmalıyım. Neden olabilir."
+      },
+      {
+        "role": "assistant",
+        "content": "**Neden olabilir?**  \n- Axxon One için IP kamera sürücü paketi (Drivers Pack) yanlış kurulmuş veya eksik.  \n- IP kamera ağ ayarları (IP adresi, subnet, portlar) Axxon One ile uyumsuz olabilir.  \n- Ağ segmentasyonu veya güvenlik duvarı engelleri nedeniyle kamera erişimi sağlanmıyorsa (11.2.2.1, 12.1.2).  \n\n**Ne yapmalıyım?**  \n1. **Drivers Pack kurulumu kontrolü**: AxxonOne User Guide'da 11.2.2.1 bölümde belirtilen sürücü paketini yeniden kurun (Sayfa 39).  \n2. **IP kamera ağ ayarlarını kontrol edin**: IP adresi, subnet ve portlar (RTSP: 554, ONVIF: 80/443) Axxon One ile uyumlu olmalı (12.1.2, Sayfa 73).  \n3. **Ağ segmentasyonunu kontrol edin**: Kamera ve Axxon One cihazları aynı ağa (subnet) olmalıdır (12.1.2, Sayfa 73).  \n\nDokümanlarda belirtilen adımları takip ederek sorununuzun çözülmesini sağlayabilirsiniz. Eksik bilgi varsa lütfen belirtin."
+      },
+      {
+        "role": "user",
+        "content": "Aynı soruya tekrar cevap verecek olsan cevabın ne olurdu"
+      },
+      {
+        "role": "assistant",
+        "content": "**Neden olabilir?**  \n- Axxon One için IP kamera sürücü paketi eksik veya yanlış kurulmuş.  \n- IP ayarları (IP adresi, subnet, portlar) uyumsuz.  \n- Ağ engelleri (güvenlik duvarı, segmentasyon) nedeniyle erişim sağlanmıyorsa.  \n\n**Ne yapmalıyım?**  \n1. AxxonOne User Guide'da **11.2.2.1** bölümündeki sürücü paketini yeniden kurun (Sayfa 39).  \n2. IP adresi, subnet ve portlar (RTSP: 554, ONVIF: 80/443) Axxon One ile uyumlu olmalı (12.1.2, Sayfa 73).  \n3. Kamera ve Axxon One cihazları **aynı ağa (subnet)** olmalıdır (12.1.2, Sayfa 73)."
+      },
+      {
+        "role": "user",
+        "content": "Peki son bir kez daha cevap ver"
+      },
+      {
+        "role": "assistant",
+        "content": "**Neden olabilir?**  \n- IP kamera sürücü paketi eksik.  \n- IP adresi veya ağ ayarları hatalı.  \n- Güvenlik duvarı engelleri.  \n\n**Ne yapmalıyım?**  \n1. AxxonOne User Guide'da **11.2.2.1** bölümündeki sürücü paketini yeniden kurun (Sayfa 39).  \n2. IP adresi, subnet ve portlar (RTSP: 554, ONVIF: 80/443) uyumlu olmalı (12.1.2, Sayfa 73).  \n3. Kamera ve Axxon One aynı ağa (subnet) olmalı (12.1.2, Sayfa 73)."
+      }
+    ],
+    "tarih": "2026-10-16T13:57:44"
+  }
+]
