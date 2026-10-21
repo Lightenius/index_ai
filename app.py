@@ -45,6 +45,10 @@ def reranker_getir():
 
 def kaynak_hazirla(soru):
     adaylar = kelime_arama(soru, top_k=50)
+    bolumler = retrieving.retrieve_for(soru, 10)
+
+    adaylar.extend(bolumler)
+
     print("Reranker aday sayisi:", len(adaylar))
     siralanmis = reranker_getir().sirala(soru, adaylar, top_k=15) if adaylar else []
     print("Reranker sonuc sayisi:", len(siralanmis))
@@ -432,7 +436,7 @@ with sohbet_tab:
                                 ilgili = kaynak_hazirla(soru)
 
                                 print(f"Retrieving for query: {soru}", flush=True)
-                                bolumler = retrieving.retrieve_for(soru, 10)
+                                
 
 
                                 
@@ -460,7 +464,7 @@ Verdiğin cevaplarda kendi bilgin veya yorumun olan kısımlar ile kaynak göste
 Düzgün bir türkçe kullan. Terimleri ise çevirmeden, orjinal dillerinde yaz.
 
 İlgili doküman bölümleri:
-{bolumler if bolumler else "İlgili bölüm bulunamadı."}
+{ilgili if ilgili else "İlgili bölüm bulunamadı."}
 """}
                                 
                                 onceki_mesajlar = sohbet_bul(
