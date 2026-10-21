@@ -398,8 +398,19 @@ with sohbet_tab:
 
                         else:
                             with st.spinner("Yanıt hazırlanıyor..."):
-                                ilgili = ilgili_bolumleri_bul(soru)
+                                #ilgili = ilgili_bolumleri_bul(soru)
+                                
+                                import documents
+                                import SemanticRetriever
+                                pdf_dicts = documents.get_pdf_dicts()
+                                retriever = SemanticRetriever.SemanticRetriever()
+                                retriever.index(pdf_dicts)
+                                bols = retriever.retrieve(soru, 20)
+                                bolumler = ""
 
+                                for bol in bols:
+                                    bolumler += "\n--- File: " + bol["filename"] + " | Page :" + bol["page_number"] + " ---\n" + bol["content"] + "\n--- END of PASSAGE ---\n"
+                                
                                 sistem_mesaji = {
                                     "role": "system",
                                     "content": f"""
@@ -424,10 +435,9 @@ Verdiğin cevaplarda kendi bilgin veya yorumun olan kısımlar ile kaynak göste
 Düzgün bir türkçe kullan. Terimleri ise çevirmeden, orjinal dillerinde yaz.
 
 İlgili doküman bölümleri:
-{ilgili if ilgili else "İlgili bölüm bulunamadı."}
+{bolumler if bolumler else "İlgili bölüm bulunamadı."}
 """
-                                }
-
+                                
                                 onceki_mesajlar = sohbet_bul(
                                     aktif_id
                                 )["mesajlar"][-6:]

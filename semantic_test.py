@@ -24,7 +24,7 @@ print(f"Successfully indexed {num_chunks} text passages.")
 
 # 4. Search for a query
 query = input("Query to test: ")
-results = retriever.retrieve(prompt=query, top_k=2)
+results = retriever.retrieve(prompt=query, top_k=20)
 
 # 5. Process the results
 for i, result in enumerate(results, 1):
