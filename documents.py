@@ -400,11 +400,6 @@ def kelime_arama(soru, top_k=50):
 
     return sonuclar[:top_k]
 
-
-<<<<<<< HEAD
-    return "\n\n---\n\n".join(metinler)
-
-
 def get_pdf_dicts():
     """
     Kayıtlı tüm PDF belgelerini okur ve her biri için dosya adı ve sayfa içeriklerini 
@@ -436,13 +431,4 @@ def get_pdf_dicts():
         sonuc_listesi.append(pdf_verisi)
         
     return sonuc_listesi
-=======
-def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
-    """Eski metin aray?z?n? korur; puanlama kelime_arama ile ortakt?r."""
-    return "\n\n---\n\n".join(
-        f"Dosya: {sonuc['ad']}\n"
-        f"Sayfa: {sonuc['page']}\n"
-        f"{sonuc['text']}"
-        for sonuc in kelime_arama(soru, top_k=maksimum_bolum)
-    )
->>>>>>> Reranker
+
