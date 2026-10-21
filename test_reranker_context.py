@@ -1,7 +1,7 @@
 
 from pathlib import Path
 
-from documents import belgeleri_getir, pdf_oku
+from documents import belgeleri_getir, kelime_arama
 from reranker import Reranker
 from context import (
     sayfalari_genislet,
@@ -21,34 +21,9 @@ if not belgeler:
     print("Sistemde kayıtlı PDF bulunamadı.")
 
 else:
-    parcalar = []
-
-    # 3. Gerçek PDF'lerden metin parçaları oluştur
-    for belge in belgeler:
-        sayfalar = pdf_oku(
-            belge["dosya_yolu"],
-            belge["hash"]
-        )
-
-        for sayfa in sayfalar:
-            metin = sayfa["metin"]
-
-            for baslangic in range(0, len(metin), 1200):
-                parca = metin[baslangic:baslangic + 1200]
-
-                if not parca.strip():
-                    continue
-
-                parcalar.append({
-                    "pdf_id": belge["id"],
-                    "page": sayfa["sayfa"],
-                    "text": parca,
-                    "chunk_id": (
-                        f"{belge['id']}_{sayfa['sayfa']}_{baslangic}"
-                    )
-                })
-
-    print("Toplam parça sayısı:", len(parcalar))
+    # Production uses lexical retrieval before reranking.
+    parcalar = kelime_arama(soru, top_k=50)
+    print("Reranker aday sayisi:", len(parcalar))
 
     if not parcalar:
         print("PDF'lerde okunabilir metin bulunamadı.")
@@ -60,7 +35,7 @@ else:
         siralanmis = reranker.sirala(
             soru,
             parcalar,
-            top_k=3
+            top_k=15
         )
 
         # 5. Reranker sonuçlarını TXT dosyasına kaydet

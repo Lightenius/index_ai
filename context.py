@@ -110,10 +110,9 @@ def baglam_hazirla(sayfalar, max_karakter=16000):
 
         kalan = max_karakter - kullanilan
 
-        if kalan <= 0:
-            break
 
         if len(blok) > kalan:
+            print(f"Context budget: skipped {sayfa['ad']} / {sayfa['sayfa']}")
             # Sayfayı ortasından kesmek yerine
             # bu sürümde sayfayı atlıyoruz.
             continue

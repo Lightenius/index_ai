@@ -280,7 +280,10 @@ def kelimeler(metin):
     )
 
 
-def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
+def kelime_arama(soru, top_k=50):
+    """Mevcut kelime puanlamas?yla ortak formatta aday par?alar d?nd?r?r."""
+    if top_k <= 0:
+        return []
     gereksiz = {
         "ve", "veya", "ile", "bir", "bu", "şu",
         "için", "bana", "göre", "olan", "nedir",
@@ -293,7 +296,7 @@ def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
     aranan = kelimeler(soru) - gereksiz
 
     if not aranan:
-        return ""
+        return []
 
     sonuclar = []
 
@@ -356,6 +359,10 @@ def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
 
                     if puan > 0:
                         sonuclar.append({
+                            "pdf_id": belge["id"],
+                            "chunk_id": f"{belge['id']}_{sayfa['sayfa']}_{baslangic}",
+                            "page": sayfa["sayfa"],
+                            "text": parca,
                             "puan": puan,
                             "ad": belge["ad"],
                             "sayfa": sayfa["sayfa"],
@@ -391,31 +398,14 @@ def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
         reverse=True
     )
 
-    metinler = []
+    return sonuclar[:top_k]
 
-    print(
-        "Nokta 5 - "
-        + str(
-            datetime.datetime.now(
-                datetime.timezone.utc
-            ).timestamp()
-        )
+
+def ilgili_bolumleri_bul(soru, maksimum_bolum=3):
+    """Eski metin aray?z?n? korur; puanlama kelime_arama ile ortakt?r."""
+    return "\n\n---\n\n".join(
+        f"Dosya: {sonuc['ad']}\n"
+        f"Sayfa: {sonuc['page']}\n"
+        f"{sonuc['text']}"
+        for sonuc in kelime_arama(soru, top_k=maksimum_bolum)
     )
-
-    for sonuc in sonuclar[:maksimum_bolum]:
-        metinler.append(
-            f"Dosya: {sonuc['ad']}\n"
-            f"Sayfa: {sonuc['sayfa']}\n"
-            f"{sonuc['metin']}"
-        )
-
-    print(
-        "Nokta 6 (Tamamlandı) - "
-        + str(
-            datetime.datetime.now(
-                datetime.timezone.utc
-            ).timestamp()
-        )
-    )
-
-    return "\n\n---\n\n".join(metinler)
