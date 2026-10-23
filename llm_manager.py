@@ -1,0 +1,1 @@
+# will use ollama to call qwen3:8b llm model.

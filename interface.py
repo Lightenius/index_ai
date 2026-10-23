@@ -223,7 +223,7 @@ def render_documents():
                 key="upload_document",
             ):
                 filename = safe_pdf_name(uploaded_file.name)
-
+                print(f"Trying to upload: {filename}")
                 try:
                     target = get_file_path(filename)
 

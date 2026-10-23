@@ -23,4 +23,5 @@
 | platform_calculator.py
 | file_manager.py           ✓
 | data_manager.py
+| llm_manager.py
 
