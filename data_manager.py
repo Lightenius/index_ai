@@ -1,0 +1,1 @@
+# Chat ve döküman datasının işleyişinden sorumlu
