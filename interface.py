@@ -4,6 +4,7 @@ import re
 import uuid
 
 import streamlit as st
+import file_manager
 
 # These must already exist in your project:
 # data_manager
