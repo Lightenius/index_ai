@@ -22,8 +22,7 @@ def load_json_file(file_path: str) -> list[list[dict]]:
     bytes_json = bytes()
 
     try:
-        # bytes_json = file_manager.load_file(file_path)
-        bytes_json = open(file_path, "rb").read()
+        bytes_json = file_manager.load_file(file_path)
     except FileNotFoundError:
         return []
 
@@ -62,18 +61,19 @@ class chat:
 
     @staticmethod
     def save_chat_data():
-        with open("data/chats.json", "w") as f:
-            json.dump(chat.chat_data, f, indent=4)
+        data =json.dumps(chat.chat_data, indent=4)
+        file_manager.create_file("data/chats.json", data.encode('utf-8'))
 
 
-@staticmethod
+
+    @staticmethod
     def add_message(chat_id: int, sender: str, content: str):
         if chat.chat_data == []:
             chat.chat_data = [[]]
         if 0 <= chat_id < len(chat.chat_data):
             chat.chat_data[chat_id].append({
                 "sender": sender,
-                "date": datetime.datetime.now(), 
+                "date": str(datetime.datetime.now()), 
                 "content": content
             })
         else:
@@ -88,4 +88,9 @@ class document:
 
 
 
-chat.test_chat_history()
+chat.load_chat_data()
+chat.add_message(0, "tester", "Hello, this is a test message.")
+print(chat.get_chat(0))
+print()
+print(chat.chat_data, flush=True)
+chat.save_chat_data()

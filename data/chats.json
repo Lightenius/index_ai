@@ -2,20 +2,29 @@
     [
         {
             "sender": "user",
+            "date": "unknown",
             "message": "Please complete the code in the middle given the prefix code snippet and suffix"
         },
         {
             "sender": "assistant",
+            "date": "unknown",
             "message": "Sure! Please provide the code snippet you would like me to complete."
+        },
+        {
+            "sender": "tester",
+            "date": "2026-10-23 14:40:54.230778",
+            "content": "Hello, this is a test message."
         }
     ],
     [
         {
             "sender": "user",
+            "date": "unknown",
             "message": "Context should be generated"
         },
         {
             "sender": "assistant",
+            "date": "unknown",
             "message": "The context is that you are working on a Python project that involves managing files, specifically PDFs, and using Streamlit for the interface. You have recently edited files such as `interface.py`, `requirements.txt`, and `.gitignore`. The changes include adding new dependencies, importing a file manager module, and modifying the upload functionality in the interface."
         }
     ]
