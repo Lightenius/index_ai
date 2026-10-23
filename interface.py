@@ -1,0 +1,1 @@
+# Web arayüzüne ilişkin kod burada bulunacak.

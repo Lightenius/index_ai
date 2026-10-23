@@ -1,0 +1,1 @@
+# Kelime ve anlam eşleşmelerinden gelen yüksek puanlı pasajları derlemek ve en alakalı olanları seçmek için kullanılacak.

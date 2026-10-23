@@ -21,3 +21,5 @@
 | preprocessing.py
 | matcher.py
 | platform_calculator.py
+| file_manager.py
+

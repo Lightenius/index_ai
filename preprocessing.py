@@ -1,0 +1,1 @@
+# Eğer input handler bir girdinin llm'e gitmesine karar verdiyse bu katmanda bu girdi üzerinde işlemler yapılacak.
