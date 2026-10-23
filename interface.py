@@ -5,6 +5,7 @@ import uuid
 
 import streamlit as st
 import file_manager
+import data_manager
 
 # These must already exist in your project:
 # data_manager
@@ -66,8 +67,9 @@ def format_size(size):
 
 
 def load_chat_ids():
+    data_manager.chat.load_chat_data()
     try:
-        return list(data_manager.chat.get_chat_ids() or [])
+        return list(data_manager.chat.get_chat_ids())
     except Exception as exc:
         st.error(f"Sohbetler yüklenemedi: {exc}")
         return []
@@ -92,17 +94,18 @@ def render_sidebar():
         st.subheader("Sohbet geçmişi")
 
         chat_ids = load_chat_ids()
+        print(f"Loaded chat IDs: {chat_ids}", flush=True)
 
         if not chat_ids:
             st.caption("Henüz kayıtlı sohbet yok.")
 
         for chat_id in chat_ids:
             try:
-                name = data_manager.chat.get_name(chat_id)
+                name = data_manager.chat.get_chat_name(chat_id)
             except Exception:
                 name = None
 
-            label = str(name or "Yeni sohbet").strip()
+            label = str(name if name else "Yeni sohbet").strip()
             if not label:
                 label = "Yeni sohbet"
 
@@ -167,7 +170,7 @@ def render_chat():
                 continue
 
             role_name = str(item.get("name", "")).strip().lower()
-            content = item.get("message", "")
+            content = item.get("content", "")
             date = item.get("date", "")
 
             if content is None:
@@ -189,12 +192,23 @@ def render_chat():
 
     if prompt:
         if st.session_state.selected_chat_id is None:
-            st.warning(
-                "Mesaj gönderme işlemi için sohbet oluşturma "
-                "fonksiyonunun chat manager üzerinden bağlanması gerekiyor."
-            )
+            #st.warning(
+            #    "Mesaj gönderme işlemi için sohbet oluşturma "
+            #    "fonksiyonunun chat manager üzerinden bağlanması gerekiyor."
+            #)
+            
+            st.session_state.selected_chat_id = data_manager.chat.create_new_chat_with_msg(prompt)
+
+            st.rerun()    
             return
 
+        data_manager.chat.add_message(
+            st.session_state.selected_chat_id,
+            "user",
+            prompt,
+        )
+
+        st.rerun()
         # Connect your existing LLM/chat service here.
         # Save the user message and assistant response using
         # your chat manager's actual write methods.

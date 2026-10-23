@@ -60,9 +60,26 @@ class chat:
 
 
     @staticmethod
+    def get_chat_ids() -> list[int]:
+        return list(range(len(chat.chat_data)))
+
+
+    @staticmethod
     def save_chat_data():
         data =json.dumps(chat.chat_data, indent=4)
-        file_manager.create_file("data/chats.json", data.encode('utf-8'))
+        with open("data/chats.json", "w") as f:
+            f.write(data)
+
+
+    @staticmethod
+    def create_new_chat_with_msg(msg: str) -> int:
+        chat.chat_data.append([{
+            "sender": "user",
+            "date": str(datetime.datetime.now()), 
+            "content": msg
+        }])
+        chat.save_chat_data()
+        return len(chat.chat_data) - 1
 
 
 
@@ -78,6 +95,8 @@ class chat:
             })
         else:
             raise ValueError("Invalid chat ID")
+        chat.save_chat_data()
+
 
         
 class document:
@@ -86,11 +105,3 @@ class document:
     def get_document_list():
         return
 
-
-
-chat.load_chat_data()
-chat.add_message(0, "tester", "Hello, this is a test message.")
-print(chat.get_chat(0))
-print()
-print(chat.chat_data, flush=True)
-chat.save_chat_data()
