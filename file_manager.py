@@ -1,107 +1,3 @@
-# Dosya yükleme ve kaydetme özellikleri.
-# diskteki bir dosyayı hafızaya yükleyen ve referans değişkenini döndüren bir fonksiyon
-# diskte bir dosyanın ismini değiştirebilen bir fonksiyon
-# diskte bulunan bir dosyayı silebilen bir fonksiyon
-# hafızadaki bir dosyayı diske kaydeden bir fonksiyon
-
-# ============================================================
-# FILE MANAGER - PROJE NOTLARI
-# ============================================================
-#
-# Bu modül AxxonSoft Index AI projesindeki dosya yönetimi
-# işlemlerinden sorumludur.
-#
-# Desteklenen işlemler:
-#
-# 1. create_file(filename: str, content: bytes) -> None
-#    - Hafızadaki binary veriyi storage klasörüne kaydeder.
-#    - Aynı isimde dosya varsa FileExistsError oluşturur.
-#
-# 2. load_file(filename: str) -> bytes
-#    - Diskte bulunan dosyayı hafızaya yükler.
-#    - Dosya içeriğini bytes olarak döndürür.
-#    - Dosya bulunamazsa FileNotFoundError oluşturur.
-#
-# 3. rename_file(old_filename: str, new_filename: str) -> None
-#    - Diskteki bir dosyanın adını değiştirir.
-#    - Eski dosya bulunamazsa FileNotFoundError oluşturur.
-#    - Yeni isimde dosya varsa FileExistsError oluşturur.
-#
-# 4. delete_file(filename: str) -> None
-#    - Diskte bulunan dosyayı siler.
-#    - Dosya bulunamazsa FileNotFoundError oluşturur.
-#
-#
-# HATA YÖNETİMİ
-# ------------------------------------------------------------
-#
-# Kullanılan exception türleri:
-#
-# - FileExistsError
-# - FileNotFoundError
-# - ValueError
-# - OSError
-#
-#
-# GÜVENLİK
-# ------------------------------------------------------------
-#
-# File Manager yalnızca "storage" klasörü içinde çalışır.
-#
-# Aşağıdaki gibi güvensiz yollar engellenir:
-#
-# ../secret.txt
-# ../../file.txt
-# folder/file.txt
-# folder\file.txt
-# C:\Windows\file.txt
-#
-# Böylece kullanıcının storage klasörünün dışındaki dosyalara
-# erişmesi engellenir.
-#
-# Symbolic link kullanılarak storage klasörünün dışına çıkılması
-# da _get_file_path() fonksiyonu tarafından kontrol edilir.
-#
-#
-# BINARY DOSYA DESTEĞİ
-# ------------------------------------------------------------
-#
-# Dosya içerikleri bytes olarak yönetildiği için sistem:
-#
-# - TXT
-# - PDF
-# - JSON
-# - resim dosyaları
-# - diğer binary dosya türleri
-#
-# gibi farklı dosya türlerini bozmadan saklayabilir.
-#
-#
-# TESTLER
-# ------------------------------------------------------------
-#
-# Test dosyası:
-# test_file_manager.py
-#
-# Testleri çalıştırmak için:
-#
-# python -m pytest -v
-#
-# Test edilen durumlar:
-#
-# - Dosya oluşturma
-# - Dosya yükleme
-# - Dosya yeniden adlandırma
-# - Dosya silme
-# - Binary veri bütünlüğü
-# - FileExistsError
-# - FileNotFoundError
-# - ValueError
-# - Güvensiz yolların engellenmesi
-#
-# ============================================================
-
-
 """
 AxxonSoft Index AI - File Manager
 
@@ -117,25 +13,40 @@ Desteklenen dosya alanları:
     storage/
     data/
 
-Basit bir dosya adı verilirse varsayılan olarak storage klasörü kullanılır.
+Davranış:
+    - Basit bir dosya adı verilirse varsayılan olarak storage kullanılır.
+    - Alt klasörler desteklenir.
+    - storage/... ve data/... yolları desteklenir.
+    - İzin verilen klasörlerin içindeki absolute path'ler desteklenir.
+    - storage/data dışına çıkmaya çalışan yollar engellenir.
+    - create_file aynı isimde dosya varsa mevcut içeriğin üzerine yazar.
 
 Örnekler:
     create_file("example.txt", b"Hello")
         -> storage/example.txt
 
+    create_file("documents/example.txt", b"Hello")
+        -> storage/documents/example.txt
+
+    create_file("data/example.txt", b"Hello")
+        -> data/example.txt
+
     load_file("storage/example.txt")
 
     load_file("data/document.pdf")
 
-    load_file("data/documents/document.pdf")
+    rename_file("data/old.pdf", "new.pdf")
+        -> data/new.pdf
+
+    delete_file("data/example.txt")
 """
 
 from pathlib import Path
 
 
-# ------------------------------------------------------------
+# ============================================================
 # TEMEL KLASÖRLER
-# ------------------------------------------------------------
+# ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -143,9 +54,9 @@ STORAGE_DIR = BASE_DIR / "storage"
 DATA_DIR = BASE_DIR / "data"
 
 
-# ------------------------------------------------------------
+# ============================================================
 # YARDIMCI FONKSİYONLAR
-# ------------------------------------------------------------
+# ============================================================
 
 def _validate_path(path_value: str) -> Path:
     """
@@ -153,16 +64,19 @@ def _validate_path(path_value: str) -> Path:
 
     Alt klasör kullanımına izin verilir.
 
-    Örnek geçerli değerler:
+    Geçerli örnekler:
         file.txt
+        documents/file.txt
         storage/file.txt
         data/file.pdf
         data/documents/file.pdf
 
     Raises:
         ValueError:
-            Yol boşsa, string değilse, null karakter içeriyorsa
-            veya '..' ile path traversal deneniyorsa.
+            Yol string değilse,
+            boşsa,
+            null karakter içeriyorsa
+            veya '..' ile üst klasöre çıkılmaya çalışılıyorsa.
     """
 
     if not isinstance(path_value, str):
@@ -184,10 +98,17 @@ def _validate_path(path_value: str) -> Path:
 
     path = Path(path_value)
 
-    # ../ veya ..\\ kullanılarak üst klasöre çıkılmasını engeller.
+    # ../ veya ..\ kullanılarak üst klasöre çıkılmasını engeller.
     if ".." in path.parts:
         raise ValueError(
             "Dosya yolunda '..' kullanılamaz."
+        )
+
+    # Windows'ta C:folder\file.txt gibi drive-relative
+    # yolların kullanılmasını engeller.
+    if path.drive and not path.is_absolute():
+        raise ValueError(
+            "Drive-relative dosya yolları kullanılamaz."
         )
 
     return path
@@ -196,6 +117,18 @@ def _validate_path(path_value: str) -> Path:
 def _is_inside(path: Path, directory: Path) -> bool:
     """
     Bir yolun verilen klasörün içinde olup olmadığını kontrol eder.
+
+    Args:
+        path:
+            Kontrol edilecek yol.
+
+        directory:
+            İzin verilen ana klasör.
+
+    Returns:
+        bool:
+            Yol klasörün içindeyse True,
+            değilse False.
     """
 
     try:
@@ -210,9 +143,10 @@ def _resolve_file_path(
     default_directory: Path | None = None,
 ) -> Path:
     """
-    Kullanıcıdan gelen yolu güvenli bir gerçek dosya yoluna dönüştürür.
+    Kullanıcıdan gelen yolu güvenli bir dosya yoluna dönüştürür.
 
     Kurallar:
+
         file.txt
             -> storage/file.txt
 
@@ -228,18 +162,35 @@ def _resolve_file_path(
         data/folder/file.txt
             -> data/folder/file.txt
 
-    Absolute path yalnızca storage veya data klasörlerinin içindeyse
-    kabul edilir.
+    Absolute path yalnızca storage veya data klasörlerinin
+    içindeyse kabul edilir.
+
+    Symlink dahil gerçek yol kontrol edilir ve izin verilen
+    klasörlerin dışına çıkış engellenir.
+
+    Args:
+        path_value:
+            Kullanıcı tarafından verilen dosya adı veya yolu.
+
+        default_directory:
+            Prefix verilmediğinde kullanılacak varsayılan klasör.
+            Belirtilmezse STORAGE_DIR kullanılır.
+
+    Returns:
+        Path:
+            Güvenli dosya yolu.
 
     Raises:
         ValueError:
-            Yol storage veya data klasörlerinin dışına çıkıyorsa.
+            Yol geçersizse veya izin verilen klasörlerin
+            dışına çıkıyorsa.
+
+        OSError:
+            Dosya sistemi yolu çözümlenirken hata oluşursa.
     """
 
-    # ÖNEMLİ:
     # STORAGE_DIR testlerde monkeypatch ile değiştirilebildiği için
-    # varsayılan değeri fonksiyon tanımında değil,
-    # fonksiyon çalışırken belirliyoruz.
+    # varsayılan değer fonksiyon tanımında sabitlenmez.
     if default_directory is None:
         default_directory = STORAGE_DIR
 
@@ -258,7 +209,8 @@ def _resolve_file_path(
     # --------------------------------------------------------
 
     if supplied_path.is_absolute():
-        resolved_path = supplied_path.resolve(strict=False)
+        candidate_path = supplied_path
+        resolved_path = candidate_path.resolve(strict=False)
 
         if not any(
             _is_inside(resolved_path, root)
@@ -269,7 +221,7 @@ def _resolve_file_path(
                 "dışına çıkamaz."
             )
 
-        return resolved_path
+        return candidate_path
 
     # --------------------------------------------------------
     # RELATIVE PATH
@@ -284,18 +236,17 @@ def _resolve_file_path(
 
     first_part = parts[0].lower()
 
-    # storage/... verilmişse
+    # storage/... şeklinde verilmişse
     if first_part == STORAGE_DIR.name.lower():
         root = STORAGE_DIR
         relative_parts = parts[1:]
 
-    # data/... verilmişse
+    # data/... şeklinde verilmişse
     elif first_part == DATA_DIR.name.lower():
         root = DATA_DIR
         relative_parts = parts[1:]
 
-    # Sadece dosya adı veya klasör/dosya verilmişse
-    # varsayılan storage kullanılır.
+    # Prefix yoksa varsayılan olarak storage kullanılır.
     else:
         root = default_directory
         relative_parts = parts
@@ -307,14 +258,12 @@ def _resolve_file_path(
 
     relative_path = Path(*relative_parts)
 
+    candidate_path = root / relative_path
+
     resolved_root = root.resolve()
+    resolved_path = candidate_path.resolve(strict=False)
 
-    resolved_path = (
-        root / relative_path
-    ).resolve(strict=False)
-
-    # Symlink dahil olmak üzere gerçek yolun
-    # seçilen root dışına çıkmasını engeller.
+    # Symlink dahil gerçek yolun root dışına çıkmasını engeller.
     if not _is_inside(
         resolved_path,
         resolved_root,
@@ -324,16 +273,16 @@ def _resolve_file_path(
             "dışına çıkamaz."
         )
 
-    return resolved_path
+    return candidate_path
 
 
-# ------------------------------------------------------------
+# ============================================================
 # PUBLIC API
-# ------------------------------------------------------------
+# ============================================================
 
 def load_file(filename: str) -> bytes:
     """
-    Diskte bulunan dosyayı hafızaya yükler.
+    Diskte bulunan bir dosyayı hafızaya yükler.
 
     Args:
         filename:
@@ -341,6 +290,7 @@ def load_file(filename: str) -> bytes:
 
             Örnek:
                 example.txt
+                documents/example.txt
                 storage/example.txt
                 data/example.pdf
                 data/documents/example.pdf
@@ -354,8 +304,9 @@ def load_file(filename: str) -> bytes:
             Dosya bulunamazsa.
 
         ValueError:
-            Dosya yolu geçersizse veya izin verilen
-            klasörlerin dışına çıkıyorsa.
+            Dosya yolu geçersizse,
+            izin verilen klasörlerin dışına çıkıyorsa
+            veya verilen yol bir dosya değilse.
 
         OSError:
             Dosya okunurken işletim sistemi hatası oluşursa.
@@ -382,11 +333,18 @@ def create_file(
     content: bytes,
 ) -> None:
     """
-    Hafızadaki binary veriyi diskte yeni dosya olarak oluşturur.
+    Hafızadaki binary veriyi diske kaydeder.
 
-    Basit dosya adı verilirse dosya storage klasörüne kaydedilir.
+    Dosya mevcut değilse yeni dosya oluşturur.
+
+    Aynı isimde dosya zaten mevcutsa eski içeriği siler
+    ve verilen yeni içeriği dosyanın üzerine yazar.
+
+    Basit dosya adı verilirse varsayılan olarak storage
+    klasörü kullanılır.
 
     Örnek:
+
         create_file(
             "example.txt",
             b"Hello AxxonSoft"
@@ -394,7 +352,7 @@ def create_file(
 
         -> storage/example.txt
 
-    Alt klasör de kullanılabilir:
+    Alt klasör:
 
         create_file(
             "documents/example.txt",
@@ -403,17 +361,24 @@ def create_file(
 
         -> storage/documents/example.txt
 
+    Data klasörü:
+
+        create_file(
+            "data/example.txt",
+            b"Hello"
+        )
+
+        -> data/example.txt
+
     Args:
         filename:
-            Oluşturulacak dosyanın adı veya yolu.
+            Oluşturulacak veya üzerine yazılacak
+            dosyanın adı veya yolu.
 
         content:
             Dosyaya yazılacak bytes verisi.
 
     Raises:
-        FileExistsError:
-            Dosya zaten mevcutsa.
-
         ValueError:
             filename veya content geçersizse.
 
@@ -426,7 +391,7 @@ def create_file(
             "Dosya içeriği bytes türünde olmalıdır."
         )
 
-    # Ana storage klasörünün mevcut olduğundan emin ol.
+    # Storage klasörünün mevcut olduğundan emin olur.
     STORAGE_DIR.mkdir(
         parents=True,
         exist_ok=True,
@@ -435,17 +400,17 @@ def create_file(
     file_path = _resolve_file_path(filename)
 
     # data/... veya alt klasör kullanılıyorsa
-    # gerekli klasörleri oluştur.
+    # gerekli klasörleri otomatik oluşturur.
     file_path.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    # "x" -> dosya sadece yoksa oluşturulur.
-    # "b" -> binary mod.
+    # "w" -> dosya mevcutsa içeriğini sıfırlar ve üzerine yazar.
+    #        dosya mevcut değilse yeni dosya oluşturur.
     #
-    # Dosya mevcutsa FileExistsError otomatik oluşur.
-    with file_path.open("xb") as file:
+    # "b" -> binary mod.
+    with file_path.open("wb") as file:
         file.write(content)
 
 
@@ -455,6 +420,9 @@ def rename_file(
 ) -> None:
     """
     Diskte bulunan bir dosyanın adını değiştirir.
+
+    Sadece yeni dosya adı verilirse dosya mevcut olduğu
+    klasörde yeniden adlandırılır.
 
     Örnek:
 
@@ -469,7 +437,10 @@ def rename_file(
             ->
         data/new_document.pdf
 
-    Eğer new_filename açık bir yol içeriyorsa o yol kullanılır:
+    Eğer new_filename açık bir yol içeriyorsa
+    belirtilen hedef kullanılır.
+
+    Örnek:
 
         rename_file(
             "data/document.pdf",
@@ -481,17 +452,18 @@ def rename_file(
             Mevcut dosyanın adı veya yolu.
 
         new_filename:
-            Yeni dosya adı veya yolu.
+            Yeni dosya adı veya güvenli yolu.
 
     Raises:
         FileNotFoundError:
             Eski dosya bulunamazsa.
 
         FileExistsError:
-            Hedef dosya zaten varsa.
+            Hedef dosya zaten mevcutsa.
 
         ValueError:
-            Dosya yollarından biri geçersizse.
+            Dosya yollarından biri geçersizse
+            veya verilen yol dosya değilse.
 
         OSError:
             Yeniden adlandırma sırasında sistem hatası oluşursa.
@@ -515,39 +487,41 @@ def rename_file(
         new_filename
     )
 
-    # Sadece yeni dosya adı verilmişse:
+    # --------------------------------------------------------
+    # SADECE YENİ DOSYA ADI VERİLMİŞSE
     #
+    # Örnek:
     # data/a.pdf -> b.pdf
     #
-    # sonucunu:
-    #
+    # Sonuç:
     # data/b.pdf
-    #
-    # olarak yap.
+    # --------------------------------------------------------
+
     if (
         not validated_new_path.is_absolute()
         and len(validated_new_path.parts) == 1
     ):
-        new_path = (
-            old_path.parent
-            / validated_new_path.name
-        ).resolve(strict=False)
+        new_path = old_path.parent / validated_new_path.name
 
-        # Eski dosyanın parent klasöründen
-        # symlink vb. yollarla çıkışı kontrol et.
+        resolved_new_path = new_path.resolve(strict=False)
+
         allowed_roots = (
             STORAGE_DIR.resolve(),
             DATA_DIR.resolve(),
         )
 
         if not any(
-            _is_inside(new_path, root)
+            _is_inside(resolved_new_path, root)
             for root in allowed_roots
         ):
             raise ValueError(
                 "Yeni dosya yolu izin verilen "
                 "klasörlerin dışına çıkamaz."
             )
+
+    # --------------------------------------------------------
+    # AÇIK HEDEF YOL VERİLMİŞSE
+    # --------------------------------------------------------
 
     else:
         new_path = _resolve_file_path(
@@ -574,19 +548,21 @@ def delete_file(filename: str) -> None:
 
     Args:
         filename:
-            Silinecek dosyanın adı veya yolu.
+            Silinecek dosyanın adı veya güvenli yolu.
 
             Örnek:
                 example.txt
                 storage/example.txt
                 data/example.pdf
+                data/documents/example.pdf
 
     Raises:
         FileNotFoundError:
             Dosya bulunamazsa.
 
         ValueError:
-            Dosya yolu geçersizse.
+            Dosya yolu geçersizse
+            veya verilen yol dosya değilse.
 
         OSError:
             Dosya silinirken işletim sistemi hatası oluşursa.

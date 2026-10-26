@@ -33,6 +33,10 @@ def temp_storage(tmp_path, monkeypatch):
 # ============================================================
 
 def test_create_file(temp_storage):
+    """
+    Yeni bir dosyanın oluşturulabildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "test.txt",
         b"Hello AxxonSoft",
@@ -45,17 +49,41 @@ def test_create_file(temp_storage):
     assert created_file.read_bytes() == b"Hello AxxonSoft"
 
 
-def test_create_existing_file_raises_error(temp_storage):
+def test_create_existing_file_is_overwritten(temp_storage):
+    """
+    Aynı isimde dosya varsa create_file fonksiyonunun
+    hata vermek yerine mevcut dosyanın içeriğini
+    yeni içerikle değiştirdiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "test.txt",
         b"First content",
     )
 
-    with pytest.raises(FileExistsError):
-        file_manager.create_file(
-            "test.txt",
-            b"Second content",
-        )
+    assert (
+        temp_storage / "test.txt"
+    ).read_bytes() == b"First content"
+
+    file_manager.create_file(
+        "test.txt",
+        b"Second content",
+    )
+
+    created_file = temp_storage / "test.txt"
+
+    assert created_file.exists()
+    assert created_file.is_file()
+
+    # Eski içerik tamamen silinmiş olmalı.
+    assert created_file.read_bytes() == b"Second content"
+
+    # load_file da yeni içeriği döndürmeli.
+    loaded_data = file_manager.load_file(
+        "test.txt"
+    )
+
+    assert loaded_data == b"Second content"
 
 
 def test_create_file_in_subdirectory(temp_storage):
@@ -119,6 +147,11 @@ def test_create_file_in_data_directory(temp_storage):
 # ============================================================
 
 def test_load_file(temp_storage):
+    """
+    storage içindeki bir dosyanın hafızaya
+    yüklenebildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "test.txt",
         b"Hello AxxonSoft",
@@ -132,6 +165,10 @@ def test_load_file(temp_storage):
 
 
 def test_load_file_from_subdirectory(temp_storage):
+    """
+    Alt klasördeki dosyanın yüklenebildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "documents/test.txt",
         b"Hello from folder",
@@ -145,6 +182,10 @@ def test_load_file_from_subdirectory(temp_storage):
 
 
 def test_load_file_from_data_directory(temp_storage):
+    """
+    data klasöründeki dosyanın yüklenebildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "data/test.txt",
         b"Hello Data",
@@ -158,6 +199,11 @@ def test_load_file_from_data_directory(temp_storage):
 
 
 def test_load_missing_file_raises_error(temp_storage):
+    """
+    Olmayan dosya yüklenmeye çalışıldığında
+    FileNotFoundError oluştuğunu kontrol eder.
+    """
+
     with pytest.raises(FileNotFoundError):
         file_manager.load_file(
             "olmayan_dosya.txt"
@@ -169,6 +215,10 @@ def test_load_missing_file_raises_error(temp_storage):
 # ============================================================
 
 def test_rename_file(temp_storage):
+    """
+    Dosya adının değiştirilebildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "old.txt",
         b"Test content",
@@ -224,6 +274,11 @@ def test_rename_file_in_data_directory(temp_storage):
 
 
 def test_rename_missing_file_raises_error(temp_storage):
+    """
+    Olmayan dosyanın adı değiştirilmeye çalışıldığında
+    FileNotFoundError oluştuğunu kontrol eder.
+    """
+
     with pytest.raises(FileNotFoundError):
         file_manager.rename_file(
             "olmayan.txt",
@@ -234,6 +289,14 @@ def test_rename_missing_file_raises_error(temp_storage):
 def test_rename_existing_destination_raises_error(
     temp_storage,
 ):
+    """
+    Rename sırasında hedef dosya zaten varsa
+    FileExistsError oluştuğunu kontrol eder.
+
+    create_file overwrite yapmasına rağmen rename_file
+    mevcut hedef dosyanın üzerine yazmamalıdır.
+    """
+
     file_manager.create_file(
         "first.txt",
         b"First",
@@ -249,6 +312,15 @@ def test_rename_existing_destination_raises_error(
             "first.txt",
             "second.txt",
         )
+
+    # Hata sonrası her iki dosyanın içeriği de korunmalı.
+    assert (
+        temp_storage / "first.txt"
+    ).read_bytes() == b"First"
+
+    assert (
+        temp_storage / "second.txt"
+    ).read_bytes() == b"Second"
 
 
 def test_rename_between_allowed_directories(temp_storage):
@@ -285,6 +357,10 @@ def test_rename_between_allowed_directories(temp_storage):
 # ============================================================
 
 def test_delete_file(temp_storage):
+    """
+    storage içindeki dosyanın silinebildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "delete_me.txt",
         b"Delete",
@@ -300,6 +376,10 @@ def test_delete_file(temp_storage):
 
 
 def test_delete_file_from_data_directory(temp_storage):
+    """
+    data klasöründeki dosyanın silinebildiğini kontrol eder.
+    """
+
     file_manager.create_file(
         "data/delete_me.txt",
         b"Delete",
@@ -316,6 +396,11 @@ def test_delete_file_from_data_directory(temp_storage):
 
 
 def test_delete_missing_file_raises_error(temp_storage):
+    """
+    Olmayan dosya silinmeye çalışıldığında
+    FileNotFoundError oluştuğunu kontrol eder.
+    """
+
     with pytest.raises(FileNotFoundError):
         file_manager.delete_file(
             "olmayan.txt"
@@ -327,6 +412,11 @@ def test_delete_missing_file_raises_error(temp_storage):
 # ============================================================
 
 def test_empty_filename_raises_value_error(temp_storage):
+    """
+    Boş dosya adı verildiğinde ValueError
+    oluştuğunu kontrol eder.
+    """
+
     with pytest.raises(ValueError):
         file_manager.create_file(
             "",
@@ -337,6 +427,11 @@ def test_empty_filename_raises_value_error(temp_storage):
 def test_invalid_content_type_raises_value_error(
     temp_storage,
 ):
+    """
+    content bytes değilse ValueError
+    oluştuğunu kontrol eder.
+    """
+
     with pytest.raises(ValueError):
         file_manager.create_file(
             "test.txt",
@@ -347,6 +442,11 @@ def test_invalid_content_type_raises_value_error(
 def test_directory_instead_of_file_raises_error(
     temp_storage,
 ):
+    """
+    Dosya yerine klasör load edilmeye çalışıldığında
+    ValueError oluştuğunu kontrol eder.
+    """
+
     directory = temp_storage / "folder"
 
     directory.mkdir(
@@ -409,6 +509,8 @@ def test_absolute_path_outside_allowed_directories_is_rejected(
             str(outside_file),
             b"secret",
         )
+
+    assert not outside_file.exists()
 
 
 def test_absolute_path_inside_storage_is_allowed(
