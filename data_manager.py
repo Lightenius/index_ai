@@ -5,6 +5,7 @@
 import datetime
 import json
 import file_manager
+import llm_manager
 
 
 
@@ -93,6 +94,13 @@ class chat:
                 "date": str(datetime.datetime.now()), 
                 "content": content
             })
+
+            # NOTE daha sonra yeri değiştirilebilir
+            if sender == "user":
+                response = llm_manager.ask(content)
+                chat.add_message(chat_id, "assistant", response)
+
+            
         else:
             raise ValueError("Invalid chat ID")
         chat.save_chat_data()

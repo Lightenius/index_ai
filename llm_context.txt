@@ -1,0 +1,453 @@
+KULLANICI SORUSU:
+axxon one bir makineye server and viewing client konfigürasyonu ile kurulu ise faka server ayarlarına erişim sağlanamıyor, çalıştırıldığında yalnızca client işlevleri yerine getiriliyor ise bunun sebebi ne olabilir.
+
+LLM'YE GÖNDERİLECEK KAYNAKLAR:
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 160
+User Guide
+
+15.2.3 Configuring System Objects for Devices
+
+Configuration of the Axxon One Software Package –  160
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 161
+User Guide
+
+15.2.3.1 The Server Object
+
+The Server object corresponds to a computer:
+
+•
+•
+
+on which Axxon One is installed in the Server and Client configuration;
+is on the Axxon-domain.
+
+The name of the Server object is the same as the computer's network name.
+
+The Server object is the parent of the Camera and IP Server objects, which correspond to the hardware connected to the Server.
+
+Click the Server object to view the following information:
+
+1.
+
+Buttons for creating a system speaker or SMS and email notifications, button for excluding the Server from the Axxon-
+domain, and button for launching the Configuration management utility (1).
+
+2.
+3.
+4.
+
+Information on the installed version of Axxon One and active license (2).
+Web Server configuration options (3, see Configuring the Web-Server(see page 162)).
+List of cameras connected to the Servers, including main settings (4).
+
+The number of connected devices means the total number of available IP video channels, including disabled.
+
+
+Note
+
+The list of cameras is shown as a table with the following columns: Name, IP address, Vendor, Model, Geolocation, Azimuth, 
+Quality, Frame rate and Resolution.
+
+The table can be sorted by any of the columns.
+
+
+
+Note
+
+If no cameras have been created on a Server, you are prompted to search for IP devices on the network (the IP Device 
+Discovery Wizard is launched, see Adding and removing IP devices(see page 154)).
+
+If a camera supports multistreaming, the information in the Quality, Frame rate and Resolution columns will be displayed as 
+follows > value for the lowest-quality stream/value for the highest-quality stream.
+
+Configuration of the Axxon One Software Package –  161
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 162
+User Guide
+
+15.2.3.1.1 Configuring the Web-Server
+
+The Web-Server allows accessing Axxon One remotely over the Internet (see Working with Axxon One Through the Mobile 
+Clients(see page 1156), Working with Axxon One Through the Web-Client(see page 1108)).
+
+
+
+Attention
+
+On the local computer with the Web-Server running, ports from the range [9001; 9001 + number of logical cores of the 
+processor] must be open.
+
+
+
+Attention
+
+The Web-Server records incoming non-H.264 videos into MJPEG format, therefore the incoming traffic may increase 
+dramatically.
+
+To configure the Web-Server in the Axxon One software package:
+
+1.
+
+Select a Server object.
+
+2.
+3.
+4.
+5.
+a.
+
+If you want to disable the Web-Server, set the value of Enable to No (1).
+In the Port field, enter the port number on which the Web-Server will be located (2).
+In the URL path field, enter the prefix that is added to the server address (3).
+To connect to a Web-Server via the HTTPS protocol, do the following:
+
+Specify a path to the certificate (4).
+
+
+
+Attention!
+
+Axxon One supports SSL certificates in PEM format with TLS encryption v 1.2 and 1.3 and AES GCM, AES 
+CCM and AES CBC algorithms. 
+The public key must be in CRT format, the private key must be in KEY format.
+
+Specify a path to the private key (5).
+Enter a port number to connect to the HTTPS Server (6);
+If you want to enable CORS (Cross Origin Resource Sharing) in the Web-Server, select the corresponding parameter (7).
+The Axxon One VMS supports the following:
+
+b.
+
+c.
+6.
+
+a.
+b.
+7.
+
+CORS HTTP-headers for GET and POST requests.
+Preflight requests.
+Click the Apply button.
+
+The Web-Server is now configured and available over the Internet at the following address: http://<IP address of Axxon One
+Server>:<Port>/<Prefix>. For example, if the Servers IP address is 10.0.11.1, the port is 8000, and the prefix is /asip-api, then the 
+Web-Server can be accessed at the following address: http://10.0.11.1:8000/asip-api.
+
+Configuration of the Axxon One Software Package –  162
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 47
+User Guide
+
+11.6 Implementation Requirements for the Axxon One Software Package
+
+Description of the Software Package –  47
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 48
+User Guide
+
+11.6.1 Limitations of the Axxon One Software Package
+
+When working with Axxon One, the user must keep in mind the limitations that the developer has imposed on the system in order 
+to ensure its operability.
+
+| No. | Limitation |
+| --- | --- |
+| 1 | To work with Axxon One software the following requirements for OpenGL are to be fulfilled: 1. Version 2.0 and higher. 2. Availability the ARB vertex program, GL EXT blend func separate, _ _ _ _ _ _ GL ARB framebuffer object extensions. _ _ _ Extensions availability can be checked using the OpenGL Extension Viewer program (download7). This program also contains a large database of data on OpenGL support in video cards of various vendors. |
+| 2 | Axxon One Client cannot be started if the scale of all items on the screen (DPI) is over 100%. You may have issues with Axxon One VMS if the screen resolution is set lower than 1280*960 pixels. |
+| 3 | The Server and Client must be of the same version. If not, Axxon One VMS may have issues. |
+| 4 | For correct operation of Axxon One VMS, the OS should use the UTF-8 locale. |
+| 5 | In one LAN, two Servers with the same name are not allowed, even if they belong to different Axxon-domains. |
+| 6 | Maximum video frame rate in the Client is 50 fps. |
+| 7 | To install Axxon One, you must log in to Windows as an administrator. |
+| 8 | For proper installation of Axxon One, there should be no spaces at the beginning of the name of the folder which contains the installer. |
+| 9 | For correct and full-feature operation of Axxon One software, the system must not limit network activity between all Servers and Clients. TCP and UDP access to these ports should be enabled. Otherwise, access to all ports should be allowed in the system. |
+| 10 | Time must be synchronized among all computers in the system (to be configured by the user). |
+| 11 | If you have edge storage enabled in the system, synchronization between the Server and the IP device is necessary (see The Embedded storage object(see page 229)). Lack of synchronization may lead to bad DB entries of events detected on the edge device. |
+| 12 | Before installing Axxon One, make sure the video card drivers on the computer are fully up to date. |
+| 13 | NetBIOS name of a PC must match the following requirements: • contains only Latin, numerical and "-" characters; • does not exceed 15 characters in length. |
+| 14 | The face detection tool requires a CPU supporting SSE4.2, FMA3 or AVX2.0 instruction set. |
+| 15 | The Client cannot be started on a remote desktop through the Remote Desktop Connection utility built into Windows. |
+
+7 http://realtech-vr.com/home/glview
+
+Description of the Software Package –  48
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 49
+User Guide
+
+| No. | Limitation |
+| --- | --- |
+| 16 | If a computer is linked to an Active Directory domain, one of the following conditions must be met to enable disk access: 1. Access control lists must contain only local or built-in groups and users. 2. Create an AxxonFileBrowser user in the domain and add it to the Users group (see Installation(see page 79)). This behavior is typical only of file systems that have access permissions (for example, NTFS). |
+
+Description of the Software Package –  49
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 151
+User Guide
+
+15.2.1.2.3 Removing a Server from an domain
+
+Any Server on a domain can be used to remove a Server from a domain.
+
+
+
+Attention!
+
+By excluding a Server, you also delete the macros, layouts, maps, object groups, roles, and users that have been created 
+on the Server.
+
+To remove a Server from an domain, you must perform the following steps:
+
+1.
+
+Select the Server in the list and click the Exclude from domain button.
+
+2.
+
+In the window which appears, confirm that you want to remove the Server from the domain by clicking the Yes button.
+
+The Server will then be removed from the domain. If the current Client was connected to the excluded Server, the user interfaces 
+will be unloaded and the user will be prompted to repeat the authorization procedure for Axxon One (see the section Startup(see 
+page 119)).
+
+
+
+Note
+
+You can also exclude a Server from an domain using the activation utility (see Excluding the Current Server from an 
+domain60).
+
+60 https://docs.axxonsoft.com/confluence/display/one1en/Excluding+the+Current+Server+from+an+domain
+
+Configuration of the Axxon One Software Package –  151
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 152
+User Guide
+
+15.2.1.3 Cases of Axxon Domain configuration
+
+All possible cases of Axxon Domain configuration are, to some degree, a combination of two typical cases.
+
+In the first typical case, the Servers for the future Axxon Domain are selected before Axxon One installation. This case 
+involves the following steps:
+
+1.
+
+Selecting a Server on the basis of which the new Axxon Domain will be created. Installing the Axxon One software package 
+with the Server and Client configuration type, indicating the name of the new Axxon Domain (see also step 8 of the 
+instructions in the section Installation(see page 79)).
+
+Any Server in the future Axxon Domain can be selected as the primary Server.
+
+
+Note
+
+2.
+
+Installing the Axxon One software package with the Server and Client configuration type on the other servers of the future 
+Axxon Domain, without adding them to the Axxon Domain (see also step 8 of the instructions in the section Installation(see 
+page 79)).
+
+Configuration of the Axxon One Software Package –  152
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 153
+User Guide
+
+3.
+4.
+
+Connecting to the primary server.
+Adding the remaining Servers to the Axxon Domain from the primary Server according to the instructions in the section 
+Adding a Server to an existing Axxon-domain(see page 149).
+
+In the second typical case it is necessary to add servers which are part of another Axxon Domain to a new Axxon Domain. 
+This case involves the following steps:
+
+1.
+
+Excluding all the Servers which are to be added to the new Axxon Domain from their current Axxon Domains, according to 
+the instructions in the section Removing a Server from an domain(see page 151).
+Naming the new Axxon Domain according to the instructions in the section Creating a new domain(see page 148), when 
+attempting to connect to one of the Servers excluded in step 1.
+Adding the remaining Servers to the Axxon Domain from the primary Server according to the instructions in the section 
+Adding a Server to an existing Axxon-domain(see page 149).
+
+2.
+
+3.
+
+Configuration of the Axxon One Software Package –  153
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 100
+User Guide
+
+| Command-line option | Description |
+| --- | --- |
+| /CMD="[commands]" | Basic installation options and values. Commands are [option] = \ "[value] \" or [option] = [value]" . See available installation options in the table below. |
+
+
+
+Attention!
+
+Occasionally, when installing the Bosch VideoSDK driver, the CLI window opens. To continue with installation, close 
+this window.
+
+/ADD and /REMOVE values:
+
+| x86 | x64 |
+| --- | --- |
+| Acrobat | Acrobat |
+| BaseProduct | BaseProduct |
+| IPDriverPack x86 _ | IPDriverPack x86 _ |
+| Guardant x86 _ | Guardant amd64 _ |
+| Postgres | Postgres |
+| dotnetfx35 x86 _ | dotnetfx35 x86 _ |
+| Redist2005 x86 _ | Redist2005 x86 _ |
+| Redist2010 x86 _ | Redist2010 x86 _ |
+| DetectorPack | DetectorPack |
+
+Installation options:
+
+| Installation options | Description |
+| --- | --- |
+| QUICKLAUNCH SHORTCUT='1' _ | Create shortcut: • 1 — Yes (default), • 0 — No. |
+| DESKTOP SHORTCUT='1' _ | Copy shortcut to desktop: • 1 — Yes (default), • 0 — No. |
+| INSTALLDIR='[%ProgramFiles% \AxxonSoft\AxxonOne]' | Axxon One installation folder |
+| NGP IFACE WHITELIST="0.0.0.0/0" _ _ | Network interfaces The default value is "0.0.0.0/0" (all available network interfaces) Format of network interfaces: "IP-address1 / number of unit bits in the mask, IP-address2 /number of unit bits in the mask" |
+| NGP ALT ADDR="0.0.0.0" _ _ | Setting the outside local address for a Server behind the NAT42). Format of network interfaces: "IP Address1 or DNS-name1, IP address2 or DNS Name2" |
+
+42 https://en.wikipedia.org/wiki/NAT
+
+Installing the Axxon One Software Package –  100
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 101
+User Guide
+
+| Installation options | Description |
+| --- | --- |
+| PORT RANGE START="20111" _ _ | The initial value of the port range for Server. 20111 — default. |
+| PORT RANGE COUNT="100" _ _ | Number of ports in use. The minimum number is 20. 100 — default. |
+| Options for Server and Client installation |  |
+| PATH TO DATA = 'X:\AxxonOneData', _ _ where X is the letter of the disk with the most free memory | Directory for storing the log database and metadata database. Default is X:\AxxonOneData. The PATH TO DATA parameter should be after the INSTALLDIR parameter. _ _ |
+| FBUSER TYPE='DEFAULT' _ | User account for file explorer: • DEFAULT — create a new account; the default name selected will be AxxonFileBrowser, • SYSTEM — select an account from the Local System, • SPECIFY — create a new account; choose the user name and password. |
+| FBUSER NAME='[AxxonFileBrowser]' _ | Setting a user name and password for an account in file explorer. When you choose SPECIFY of the FBUSER TYPE parameter _ |
+| FBUSER PSW='[Axxon2.0.0]' _ |  |
+| CONFIG PATH='[CommonAppDataDirectory]' _ | Path to configurations files and folders |
+| DOMAIN NAME TYPE = '[NewDomain]' _ _ | Select Axxon-domain: • NewDomain — create new Axxon-domain (default), • WithoutDomain — do NOT add Server to Axxon-domain, • TheSameDomain — use existing Axxon-domain. |
+| WHATDBUSE = '[EXIST]' | • EXIST — use existing log DB (default) • NEWDB — create new DB |
+| WHATVMDADBUSE = '[EXIST]' | • EXIST — use existing object tracking DB (default) • NEWDB — create new DB |
+
+The command for silent installation of Axxon One may look like:
+
+setup.exe /quiet /norestart /debug /INSTALLTYPE="ServerClient" /REMOVE="Guardant_x86" /
+CMD="CREATE_QUICKLAUNCH_SHORTCUT=\"0\" PORT_RANGE_COUNT=\"50\" DOMAIN_NAME_TYPE=\"WithoutDomain\""
+
+This will launch installation with the following options:
+
+1.
+2.
+3.
+4.
+5.
+6.
+a.
+b.
+
+Quiet mode (/quiet);
+no reboot (/norestart);
+log installation to file (/ debug);
+Server and Client (/ INSTALLTYPE = "ServerClient");
+No Guardant drivers (/ REMOVE = "Guardant_x86");
+And with the following properties (/ CMD =):
+
+no shortcut (="CREATE_QUICKLAUNCH_SHORTCUT=\"0\");
+50 ports for Server (PORT_RANGE_COUNT="50");
+Server NOT added to Axxon-domain (DOMAIN_NAME_TYPE = '[WithoutDomain]').
+
+c.
+
+Installing the Axxon One Software Package –  101
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 102
+User Guide
+
+12.2.6 Updating Drivers Pack
+
+To install the latest version of Drivers Pack, do as follows:
+
+1.
+2.
+
+Run the IPDriverPack.msi file.
+After the installation is complete, restart the Server (see Shutting down a Server(see page 130), Starting a Server(see page 120)).
+
+Installing the Axxon One Software Package –  102
+
+---
+
+Dosya: AxxonOne User Guide.pdf
+Sayfa: 44
+User Guide
+
+11.4 Network Topologies of the Axxon One Software Package
+
+Axxon One supports both decentralized and star network topologies.
+
+The decentralized architecture better suits smaller systems.
+
+The star architecture is more practical for creating large centrally monitored distributed systems where no local monitoring is 
+required on remote sites.
+
+
+
+Attention!
+
+If your system is based on star topology, please take into account the following:
+
+1.
+
+In a failover (see General information about a failover system(see page 785)) and non-failover systems, the Client 
+must have access to all Servers (located centrally).
+In a failover system, all Manager Servers must have access to each other (located centrally).
+
+2.
+
+Description of the Software Package –  44
+
+---
+

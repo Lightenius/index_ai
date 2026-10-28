@@ -1,0 +1,628 @@
+SORU: axxon one bir makineye server and viewing client konfigürasyonu ile kurulu ise faka server ayarlarına erişim sağlanamıyor, çalıştırıldığında yalnızca client işlevleri yerine getiriliyor ise bunun sebebi ne olabilir.
+
+SONUC 1
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_161_0
+Sayfa: 161
+Puan: 0.391764
+Metin:
+User Guide
+
+15.2.3.1 The Server Object
+
+The Server object corresponds to a computer:
+
+•
+•
+
+on which Axxon One is installed in the Server and Client configuration;
+is on the Axxon-domain.
+
+The name of the Server object is the same as the computer's network name.
+
+The Server object is the parent of the Camera and IP Server objects, which correspond to the hardware connected to the Server.
+
+Click the Server object to view the following information:
+
+1.
+
+Buttons for creating a system speaker or SMS and email notifications, button for excluding the Server from the Axxon-
+domain, and button for launching the Configuration management utility (1).
+
+2.
+3.
+4.
+
+Information on the installed version of Axxon One and active license (2).
+Web Server configuration options (3, see Configuring the Web-Server(see page 162)).
+List of cameras connected to the Servers, including main settings (4).
+
+The number of connected devices means the total number of available IP video channels, including disabled.
+
+
+Note
+
+The list of cameras is shown as a table with the following columns: Name, IP address, Vendor, Model, Geolocation, Azimuth, 
+Quality, Frame rate and Resolution.
+
+The table can be sorted by any of 
+--------------------------------------------------
+
+SONUC 2
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_48_0
+Sayfa: 48
+Puan: 0.334849
+Metin:
+User Guide
+
+11.6.1 Limitations of the Axxon One Software Package
+
+When working with Axxon One, the user must keep in mind the limitations that the developer has imposed on the system in order 
+to ensure its operability.
+
+| No. | Limitation |
+| --- | --- |
+| 1 | To work with Axxon One software the following requirements for OpenGL are to be fulfilled: 1. Version 2.0 and higher. 2. Availability the ARB vertex program, GL EXT blend func separate, _ _ _ _ _ _ GL ARB framebuffer object extensions. _ _ _ Extensions availability can be checked using the OpenGL Extension Viewer program (download7). This program also contains a large database of data on OpenGL support in video cards of various vendors. |
+| 2 | Axxon One Client cannot be started if the scale of all items on the screen (DPI) is over 100%. You may have issues with Axxon One VMS if the screen resolution is set lower than 1280*960 pixels. |
+| 3 | The Server and Client must be of the same version. If not, Axxon One VMS may have issues. |
+| 4 | For correct operation of Axxon One VMS, the OS should use the UTF-8 locale. |
+| 5 | In one LAN, two Servers with the same name are not allowed, even if they belong to different Axxon-domain
+--------------------------------------------------
+
+SONUC 3
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_152_0
+Sayfa: 152
+Puan: 0.287338
+Metin:
+User Guide
+
+15.2.1.3 Cases of Axxon Domain configuration
+
+All possible cases of Axxon Domain configuration are, to some degree, a combination of two typical cases.
+
+In the first typical case, the Servers for the future Axxon Domain are selected before Axxon One installation. This case 
+involves the following steps:
+
+1.
+
+Selecting a Server on the basis of which the new Axxon Domain will be created. Installing the Axxon One software package 
+with the Server and Client configuration type, indicating the name of the new Axxon Domain (see also step 8 of the 
+instructions in the section Installation(see page 79)).
+
+Any Server in the future Axxon Domain can be selected as the primary Server.
+
+
+Note
+
+2.
+
+Installing the Axxon One software package with the Server and Client configuration type on the other servers of the future 
+Axxon Domain, without adding them to the Axxon Domain (see also step 8 of the instructions in the section Installation(see 
+page 79)).
+
+Configuration of the Axxon One Software Package –  152
+--------------------------------------------------
+
+SONUC 4
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_101_1200
+Sayfa: 101
+Puan: 0.280338
+Metin:
+wDomain — create new Axxon-domain (default), • WithoutDomain — do NOT add Server to Axxon-domain, • TheSameDomain — use existing Axxon-domain. |
+| WHATDBUSE = '[EXIST]' | • EXIST — use existing log DB (default) • NEWDB — create new DB |
+| WHATVMDADBUSE = '[EXIST]' | • EXIST — use existing object tracking DB (default) • NEWDB — create new DB |
+
+The command for silent installation of Axxon One may look like:
+
+setup.exe /quiet /norestart /debug /INSTALLTYPE="ServerClient" /REMOVE="Guardant_x86" /
+CMD="CREATE_QUICKLAUNCH_SHORTCUT=\"0\" PORT_RANGE_COUNT=\"50\" DOMAIN_NAME_TYPE=\"WithoutDomain\""
+
+This will launch installation with the following options:
+
+1.
+2.
+3.
+4.
+5.
+6.
+a.
+b.
+
+Quiet mode (/quiet);
+no reboot (/norestart);
+log installation to file (/ debug);
+Server and Client (/ INSTALLTYPE = "ServerClient");
+No Guardant drivers (/ REMOVE = "Guardant_x86");
+And with the following properties (/ CMD =):
+
+no shortcut (="CREATE_QUICKLAUNCH_SHORTCUT=\"0\");
+50 ports for Server (PORT_RANGE_COUNT="50");
+Server NOT added to Axxon-domain (DOMAIN_NAME_TYPE = '[WithoutDomain]').
+
+c.
+
+Installing the Axxon One Software Package –  101
+--------------------------------------------------
+
+SONUC 5
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_43_0
+Sayfa: 43
+Puan: 0.268930
+Metin:
+User Guide
+
+11.3 Functions of the Distributed Security System
+
+You can create a distributed system within an Axxon Domain on Axxon One.
+
+Axxon Domain – a selected group of computers on which the server configuration of the Axxon One software package is installed. 
+Linking the servers in a group makes it possible to set up interaction between them, thus organizing a distributed system.
+
+Servers are interoperable only if they belong to the same Axxon domain. At the same time, each Server of the domain operates 
+independently and has its own DB.
+
+A distributed security system based on the Axxon One software package offers the user the following functional capabilities:
+
+1.
+2.
+3.
+4.
+
+Viewing and manual processing of video and audio data from several servers on one client;
+Controlling video cameras connected to various servers from one client;
+Configuring all servers of the distributed system on one client;
+Execution of automatic responses when detection tools are triggered (audio notification, triggering of relays, SMS and e-
+mail notification, etc.) within the distributed system.
+
+
+
+Note
+
+If a Server is not accessible by NetBiosName or some TCP and UDP ports are closed, it is possibl
+--------------------------------------------------
+
+SONUC 6
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_79_0
+Sayfa: 79
+Puan: 0.239540
+Metin:
+User Guide
+
+12.2.1 Installation
+
+To install Axxon One, regardless of the type of installation, it is necessary to perform the following steps:
+
+1.
+
+Open the Axxon One distribution package.
+
+2.
+
+Run the Setup.exe file.
+
+
+
+Note
+
+If you cannot run the installation files downloaded from the Internet, do as follows: allow running programs and 
+unsafe files in Windows OS.
+
+3.
+
+In the dialog box, choose the required language from the list and click the Install button.
+
+4.
+a.
+
+Select the Axxon One installation type in the dialog box by clicking the appropriate option button:
+
+Client – installs only a Client application that allows the user to connect to any Server and perform administration/
+management/monitoring operations with the protected object based on the permissions granted by the 
+administrator.
+Server and Client — installs Client and Server services. Axxon One Server:
+
+b.
+
+Interacts with devices (cameras, microphones, inputs, outputs, etc.) that constitute a security system.
+Writes video footage to archives on system disks; interacts with archives on NAS.
+Hosts metadata database.
+Employs detection tools to analyze live video.
+Keeps configurations of the security system, user set
+--------------------------------------------------
+
+SONUC 7
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_239_0
+Sayfa: 239
+Puan: 0.227143
+Metin:
+User Guide
+
+15.2.4.3.2 Axis T8310 specific configuration features
+
+15.2.4.3.2.1 Setting up on a Server
+
+To make a T8132 keyboard operate with Rev01 hardware, restart the Axxon One VMS server after you create the IP Server object 
+(see Shutting down a Server(see page 130), Starting a Server(see page 120)).
+
+15.2.4.3.2.2 Setting up on a Client
+
+You can use the Axis T8310 control board with remote Clients through the driver embedded into the Axxon One software. The 
+panel is not added to the system as an IP device, and is immediately available for assigning hotkeys.
+
+Various models differ in connected devices78.
+
+| T8310 | All devices |
+| --- | --- |
+| T8311 | Joystick only |
+| T8311 / T8312 | Joystick and keypad |
+| T8311 / T8313 | Joystick and jog dial |
+| T8312 | Keypad only |
+| T8312 / T8313 | Keypad and jog dial |
+| T8313 | Jog dial only |
+
+78 https://www.axis.com/products/axis-t8310-video-surveillance-control-board
+
+Configuration of the Axxon One Software Package –  239
+--------------------------------------------------
+
+SONUC 8
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_121_0
+Sayfa: 121
+Puan: 0.213328
+Metin:
+User Guide
+
+14.1.2 Starting an Axxon One Client
+
+The Axxon One Client can be started manually using the Start menu, which is intended for launching user programs in Windows.
+
+
+
+Note
+
+To launch the Client from command line, you have to specify the following parameters: login, password and Server.
+For example: C:\Program Files\AxxonSoft\Axxon One\bin>Axxon One.exe --login=root --password=root --
+server=127.0.0.1
+To connect to multiple Servers, specify their addresses separated by commas.
+For example: C:\Program Files\AxxonSoft\Axxon One\bin>Axxon One.exe --login=root --password=root --
+server=10.0.11.30, 10.0.11.34
+
+To start working with the software, perform the following steps:
+
+Select Start → All Programs → Axxon One → Axxon One.
+
+1.
+
+
+
+Note
+
+The Axxon One software package program file Axxon One.exe is located in the folder <Axxon One installation 
+folder>\Axxon One\bin\.
+
+
+
+Note
+
+To start the Client in Safe mode with OpenGL software emulation, select: Start → Programs → Axxon 
+One-Axxon One (Safe mode).
+
+The Axxon One Client will then launch and an authorization window will appear.
+
+2.
+
+Select a Server to connect to, and specify a port number.
+
+Launching and Closing the Axxon 
+--------------------------------------------------
+
+SONUC 9
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_48_1200
+Sayfa: 48
+Puan: 0.171357
+Metin:
+s. |
+| 6 | Maximum video frame rate in the Client is 50 fps. |
+| 7 | To install Axxon One, you must log in to Windows as an administrator. |
+| 8 | For proper installation of Axxon One, there should be no spaces at the beginning of the name of the folder which contains the installer. |
+| 9 | For correct and full-feature operation of Axxon One software, the system must not limit network activity between all Servers and Clients. TCP and UDP access to these ports should be enabled. Otherwise, access to all ports should be allowed in the system. |
+| 10 | Time must be synchronized among all computers in the system (to be configured by the user). |
+| 11 | If you have edge storage enabled in the system, synchronization between the Server and the IP device is necessary (see The Embedded storage object(see page 229)). Lack of synchronization may lead to bad DB entries of events detected on the edge device. |
+| 12 | Before installing Axxon One, make sure the video card drivers on the computer are fully up to date. |
+| 13 | NetBIOS name of a PC must match the following requirements: • contains only Latin, numerical and "-" characters; • does not exceed 15 characters in length. |
+| 14 | The fac
+--------------------------------------------------
+
+SONUC 10
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_238_0
+Sayfa: 238
+Puan: 0.164153
+Metin:
+User Guide
+
+15.2.4.3.1 General Information about CCTV Keyboards
+
+Video surveillance control panels can be connected to Axxon One in two ways:
+
+1.
+
+Connecting a panel via the Windows driver as an HID USB device. This method makes the panel immediately available for 
+specifying hotkeys (see Assigning hot keys(see page 773)).
+
+In HID mode, some control panel buttons may not work in Axxon One.
+
+
+Attention!
+
+2.
+
+Connecting a panel via the Axxon One driver. Using this method, the panel is added to the system similarly to that of IP 
+devices (see Adding and removing IP devices(see page 154)).
+
+
+
+Attention!
+
+To connect a control panel in this way, you need the Axxon One software to be installed in the Server and 
+Client configuration. It's not possible to operate a board as a remote client.
+
+The following control panels are supported in the current version of Axxon One:
+
+|  | Windows driver | Axxon One driver |
+| --- | --- | --- |
+| Axis T8310 (T8311, T8312, T8313) |  |  |
+| Dahua DH-NKB1000 |  |  |
+| PELCO KBD5000 |  |  |
+| Videotec DCZ |  |  |
+| Hikvision DS-1005KI |  |  |
+| Hikvision DS-1100KI | - |  |
+| Hikvision DS-1200KI | - |  |
+| Hikvision DS-1600KI | - |  |
+| UNIVIEW KB-1100 | -
+--------------------------------------------------
+
+SONUC 11
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_126_0
+Sayfa: 126
+Puan: 0.159221
+Metin:
+User Guide
+
+14.1.4 Axxon One in demo mode
+
+If activation has not been completed, Axxon One works in demo mode.
+
+The system will operate in demo mode from 8:00 AM to 6:00 PM. There are limitations to functionality (see Axxon One license 
+types(see page 108)).
+
+The different types of demo modes are presented in table.
+
+| Type of demo mode | Conditions | Axxon One operation |
+| --- | --- | --- |
+| Active | Axxon One can be started between the hours of 8:00 AM and 6:00 PM | Using Axxon One in demo mode |
+| Inactive | Axxon One started outside the hours of 8:00 AM and 6:00 PM | The Axxon One server is not available, only the system configuration can be viewed |
+
+If a Client is connected to an Axxon Domain in which there is at least one Server running in demo mode, an appropriate message 
+is displayed, along with a list of Servers in the Axxon Domain and their types of licenses.
+
+The notification is displayed after successful authorization.
+
+
+Note
+
+If an Axxon Domain includes at least one Server running in active demo mode, you will be given the option to continue working 
+(2) or start the activation utility (1).
+
+Launching and Closing the Axxon One Software Package –  126
+--------------------------------------------------
+
+SONUC 12
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_99_0
+Sayfa: 99
+Puan: 0.149557
+Metin:
+User Guide
+
+12.2.5 Silent install (Quiet Mode)
+
+You can run Axxon One installation in quiet mode (unattended setup with no user intervention).
+
+During installation you may have to reboot the system. After rebooting the installation will continue automatically.
+
+
+Note
+
+When Redist.exe process ends and not listed in Windows Task Manager, the installation is complete.
+
+This mode of installation can be configured by adding command-line options to setup.exe. See the command-line options in the 
+table.
+
+| Command-line option | Description |
+| --- | --- |
+| /? or /help | Open the Help window |
+| /x or /uninstall | Remove Axxon One and save the configuration |
+| /x/removeall | Remove Axxon One and delete the configuration |
+| /r or /repair | Repair Axxon One |
+| /qn or /quiet | Silent install |
+| /norestart | Disable automatic reboot of the system during installation |
+| /debug | Log installation |
+| /noOSCheck | Skip OS compatibility check |
+| /postgresinstalldir="D:\Postgres" | PostgreSQL installation folder |
+| /LANG=”en” | Select installation language: For example, en — English |
+| /INSTALLTYPE="ServerClient" | Installation options: • ServerClient — Server and Client (default), • raft
+--------------------------------------------------
+
+SONUC 13
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_579_0
+Sayfa: 579
+Puan: 0.127814
+Metin:
+User Guide
+
+15.5.4.18 Starting an external program on Servers
+
+This starts an external program on your Axxon-domain.
+
+
+
+Attention!
+
+Any software containing a GUI is not recommended to be executed on the Server. If you encounter a problem launching 
+interactive services, please refer to the Windows150 OS user manual.
+
+To configure, do the following:
+
+Allow interaction of the server NGP Host service with the desktop: Start → Control Panel → Administrative Tools → 
+Services → Net Logon → Properties → Log on.
+
+1.
+
+
+
+Note
+
+For Failover Server and Client installation type (see Installation(see page 79)), you have to allow  the NGP RaFT 
+supervisor service to interact with desktop.
+
+2.
+
+Add to folder <Directory where Axxon One is installed>\UserScripts\ one or more bat files with the application startup 
+command.
+The command should include a path to the executable file. You can specify a network path and command-line options 
+(see Starting an external program on Clients(see page 578)).
+Select the server where you want to run the program (1).
+
+3.
+
+4.
+5.
+
+Select a bat. file with the run command (2).
+Enter templates, if they were set via a bat file (3).
+
+
+
+Attention!
+
+If it is expected th
+--------------------------------------------------
+
+SONUC 14
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_39_2400
+Sayfa: 39
+Puan: 0.118247
+Metin:
+nd compressed in different codecs. Axxon One supports Multistreaming i.e. 
+receiving two streams from a camera simultaneously: high-quality and low-quality, which 
+allows taking advantage of this feature of IP equipment to optimize the CPU load on the 
+video Server and the Client workstation.
+
+•
+
+•
+
+•
+
+11.2.2.3 GreenStream
+
+The GreenStream feature saves bandwidth and Client CPU resources. It automatically 
+chooses a video stream from a camera to the Server, and then to the Client, depending on 
+the resolution at which the video is currently displayed on the Client.
+
+•
+
+•
+
+Immersion 
+Mode(see page 
+41)
+OpenStreetMa
+p(see page 41)
+Virtual PTZ 
+cameras on the 
+map(see page 42)
+
+11.2.2.4 Embedded video camera analytics
+
+•
+
+Axxon One supports on-board detection embedded in video cameras. This means that 
+when on-board detection tools are triggered, Axxon One is notified and can use these 
+events to drive system reactions. On-board detection does not burden the CPU of the 
+video Server and makes use of uncompressed video (completely bypassing the 
+compressing/decompression process), and therefore provide extra stability in difficult 
+conditions such as poor visibility.
+
+•
+
+Description of
+--------------------------------------------------
+
+SONUC 15
+PDF ID: 57715f57d45545f18d9a00b03f427d39
+Chunk ID: 57715f57d45545f18d9a00b03f427d39_162_0
+Sayfa: 162
+Puan: 0.107999
+Metin:
+User Guide
+
+15.2.3.1.1 Configuring the Web-Server
+
+The Web-Server allows accessing Axxon One remotely over the Internet (see Working with Axxon One Through the Mobile 
+Clients(see page 1156), Working with Axxon One Through the Web-Client(see page 1108)).
+
+
+
+Attention
+
+On the local computer with the Web-Server running, ports from the range [9001; 9001 + number of logical cores of the 
+processor] must be open.
+
+
+
+Attention
+
+The Web-Server records incoming non-H.264 videos into MJPEG format, therefore the incoming traffic may increase 
+dramatically.
+
+To configure the Web-Server in the Axxon One software package:
+
+1.
+
+Select a Server object.
+
+2.
+3.
+4.
+5.
+a.
+
+If you want to disable the Web-Server, set the value of Enable to No (1).
+In the Port field, enter the port number on which the Web-Server will be located (2).
+In the URL path field, enter the prefix that is added to the server address (3).
+To connect to a Web-Server via the HTTPS protocol, do the following:
+
+Specify a path to the certificate (4).
+
+
+
+Attention!
+
+Axxon One supports SSL certificates in PEM format with TLS encryption v 1.2 and 1.3 and AES GCM, AES 
+CCM and AES CBC algorithms. 
+The public key must be in CRT format, 
+--------------------------------------------------
+
