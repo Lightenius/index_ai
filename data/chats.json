@@ -21,6 +21,16 @@
             "sender": "user",
             "date": "2026-10-28 09:21:36.851105",
             "content": "devam de edebilir"
+        },
+        {
+            "sender": "user",
+            "date": "2026-10-28 09:45:36.670139",
+            "content": "merhaba"
+        },
+        {
+            "sender": "assistant",
+            "date": "2026-10-28 09:45:53.108728",
+            "content": ""
         }
     ],
     [
