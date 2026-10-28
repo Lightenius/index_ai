@@ -169,7 +169,7 @@ def render_chat():
             if not isinstance(item, dict):
                 continue
 
-            role_name = str(item.get("name", "")).strip().lower()
+            role_name = str(item["sender"])
             content = item.get("content", "")
             date = item.get("date", "")
 
@@ -182,7 +182,7 @@ def render_chat():
             else:
                 role = "assistant"
 
-            with st.chat_message(role):
+            with st.chat_message("user" if role == "user" else "assistant"):
                 st.markdown(str(content))
                 if date:
                     st.caption(str(date))

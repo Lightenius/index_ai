@@ -74,12 +74,9 @@ class chat:
 
     @staticmethod
     def create_new_chat_with_msg(msg: str) -> int:
-        chat.chat_data.append([{
-            "sender": "user",
-            "date": str(datetime.datetime.now()), 
-            "content": msg
-        }])
+        chat.chat_data.append([])
         chat.save_chat_data()
+        chat.add_message(len(chat.chat_data) - 1, "user", msg)
         return len(chat.chat_data) - 1
 
 
