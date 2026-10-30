@@ -1,3 +1,5 @@
 PyMuPdf
 streamlit
 torchvision
+pyhton-telegram-bot
+pyhton-dotenv
