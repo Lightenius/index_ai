@@ -376,7 +376,7 @@ class PDFIndex:
         return [
             {
                 "role": "context",
-                "content": f"Page: {self.pages[i]}\n{self.texts[i]}\n"
+                "content": f"Page Number: {self.pages[i]}\n{self.texts[i]}\n"
             }
             for i in top_indices
         ]

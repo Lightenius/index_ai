@@ -26,6 +26,8 @@ class TelegramBot:
     and outgoing group messages.
     """
 
+    embedding_required = False
+
     # Using collections.deque completely avoids Queue await issues 
     # and automatically drops old items when maxlen is reached.
     current_chat = deque(maxlen=MESSAGE_HISTORY_SIZE)
@@ -116,24 +118,40 @@ class TelegramBot:
             user_id (int): Telegram user ID of the sender.
         """
         # FIXED: Appending to deque doesn't need checks or await statements
+        logging.info(
+                    "\033[33mGroup message\033[0m | Chat: %s | User: %s | Message: %s",
+                    chat_id,
+                    user_id,
+                    message
+                )
+
+        if message[0:4] == ".doc":
+            TelegramBot.embedding_required = True
+            message = message[4:]
+        else:
+            TelegramBot.embedding_required = False
+
+        if message[0:4] == ".ooc": # skip out of ctx message
+            return
+        
+        if message == ".clearmemory":
+            self.current_chat.clear()
+            await self.send_group_message(".ooc chat memory cleared.", chat_id=chat_id)
+            return
+
         TelegramBot.current_chat.append({
             "role": "user",
             "content": message
         })
 
-        logging.info(
-            "Group message | Chat: %s | User: %s | Message: %s",
-            chat_id,
-            user_id,
-            message
-        )
+        
 
         # FIXED: Removed 'await' because ask_direct_llm returns a normal string
         response = llm_manager.ask_msglist_llm(TelegramBot.current_chat)
         
         sent = await self.send_group_message(response, chat_id)
         print(f"____________________\nSent message: \n{sent.text} \nto chat_id: {chat_id}\n--------------------\n")
-        print(f"____________________\nCurrent Chat History: \n{TelegramBot.current_chat}\n--------------------\n")
+        #print(f"____________________\nCurrent Chat History: \n{TelegramBot.current_chat}\n--------------------\n")
 
     async def send_group_message(
         self,
@@ -152,7 +170,7 @@ class TelegramBot:
         """
         # FIXED: Appending to deque doesn't need checks or await statements
         
-        if message[0:4] != "/ooc":
+        if message[0:4] != ".ooc":
             TelegramBot.current_chat.append({
                 "role": "assistant",
                 "content": message
