@@ -5,7 +5,7 @@ A passage could be a paragraph, a sentence, or a table.
 import sys
 import pymupdf
 from logger import Logger
-from typing import List
+from typing import List, Dict
 import time
 
 import re
@@ -84,12 +84,17 @@ def get_paragraphs(pdf_path) -> List[str]:
 
     return paragraphs
 
-def get_pages(pdf_path) -> List[str]:
+def get_pages(pdf_path) -> List[Dict[str, str]]:
     doc = pymupdf.open(pdf_path)
     pages = []
     for i, _ in enumerate(doc):
         text = doc.get_page_text(i)
-        pages.append("{\n\tpage_number: " + str(i) + "\n\tcontent: \"" + text.strip() + "\"\n}")
+        pages.append(
+            {
+            "page_number": str(i),
+            "content": text.strip()
+            }
+        )
     return pages
 
 

@@ -3,9 +3,12 @@ import sys
 import logging
 from datetime import datetime
 
-# Define a custom 'SYSTEM' log level (between INFO and WARNING)
+# Custom log levels
 SYSTEM_LEVEL = 25
+PERF_LEVEL = 22
+
 logging.addLevelName(SYSTEM_LEVEL, "SYSTEM")
+logging.addLevelName(PERF_LEVEL, "PERF")
 
 
 class AlignedFormatter(logging.Formatter):
@@ -13,38 +16,41 @@ class AlignedFormatter(logging.Formatter):
     
     TYPE_COLUMN_WIDTH = 8
 
-    def format(self, record):
-        # 1. Format date and time
-        dt_str = self.formatTime(record, self.datefmt)
-        
-        # 2. Normalize and pad the log type (levelname) for vertical alignment
-        levelname = record.levelname
-        padded_type = levelname.ljust(self.TYPE_COLUMN_WIDTH)
-        
-        # 3. Format message
-        message = record.getMessage()
-        
-        # Assemble plain text format for file
-        plain_formatted = f"{dt_str} | {padded_type} | {message}"
-        
-        # Apply ANSI coloring if enabled for console output
-        if getattr(record, 'use_color', False):
-            color = self.COLORS.get(levelname, self.COLORS['RESET'])
-            reset = self.COLORS['RESET']
-            colored_type = f"{color}{padded_type}{reset}"
-            return f"{dt_str} | {colored_type} | {message}"
-            
-        return plain_formatted
-
     COLORS = {
         'DEBUG': '\033[36m',      # Cyan
         'INFO': '\033[32m',       # Green
+        'PERF': '\033[1;36m',     # Bold Cyan
         'SYSTEM': '\033[35m',     # Magenta
         'WARNING': '\033[33m',    # Yellow
         'ERROR': '\033[31m',      # Red
         'CRITICAL': '\033[1;31m', # Bold Red
         'RESET': '\033[0m'
     }
+
+    # Log levels where the full output line should be colored
+    FULL_LINE_COLOR_LEVELS = {'SYSTEM', 'PERF', 'ERROR', 'CRITICAL'}
+
+    def format(self, record):
+        dt_str = self.formatTime(record, self.datefmt)
+        levelname = record.levelname
+        padded_type = levelname.ljust(self.TYPE_COLUMN_WIDTH)
+        message = record.getMessage()
+
+        plain_formatted = f"{dt_str} | {padded_type} | {message}"
+
+        if getattr(record, 'use_color', False):
+            color = self.COLORS.get(levelname, self.COLORS['RESET'])
+            reset = self.COLORS['RESET']
+
+            if levelname in self.FULL_LINE_COLOR_LEVELS:
+                # Color the entire log line
+                return f"{color}{dt_str} | {padded_type} | {message}{reset}"
+            else:
+                # Color only the log type tag
+                colored_type = f"{color}{padded_type}{reset}"
+                return f"{dt_str} | {colored_type} | {message}"
+            
+        return plain_formatted
 
 
 class Logger:
@@ -99,6 +105,11 @@ class Logger:
     @classmethod
     def info(cls, message, *args, **kwargs):
         cls._get_logger().info(message, *args, **kwargs, extra={'use_color': True})
+
+    @classmethod
+    def perf(cls, message, *args, **kwargs):
+        """Custom log level for performance metrics and execution timing."""
+        cls._get_logger().log(PERF_LEVEL, message, *args, **kwargs, extra={'use_color': True})
 
     @classmethod
     def system(cls, message, *args, **kwargs):
