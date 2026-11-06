@@ -6,6 +6,7 @@ import uuid
 import streamlit as st
 import file_manager
 import data_manager
+from logger import Logger
 
 # These must already exist in your project:
 # data_manager
@@ -37,7 +38,11 @@ def get_document_info(doc_id):
         if not isinstance(data, dict):
             return {"name": str(doc_id), "size": 0}
         return data
-    except Exception:
+    except Exception as exc:
+        Logger.error(
+            f"Document metadata could not be loaded for {doc_id}: {exc}",
+            exc_info=True,
+        )
         return {"name": str(doc_id), "size": 0}
 
 
@@ -55,6 +60,7 @@ def format_size(size):
     try:
         size = float(size)
     except (TypeError, ValueError):
+        Logger.error(f"Could not format invalid document size: {size!r}")
         return "Bilinmiyor"
 
     if size < 1024:
@@ -67,10 +73,11 @@ def format_size(size):
 
 
 def load_chat_ids():
-    data_manager.chat.load_chat_data()
     try:
+        data_manager.chat.load_chat_data()
         return list(data_manager.chat.get_chat_ids())
     except Exception as exc:
+        Logger.error(f"Chats could not be loaded: {exc}", exc_info=True)
         st.error(f"Sohbetler yüklenemedi: {exc}")
         return []
 
@@ -102,7 +109,11 @@ def render_sidebar():
         for chat_id in chat_ids:
             try:
                 name = data_manager.chat.get_chat_name(chat_id)
-            except Exception:
+            except Exception as exc:
+                Logger.error(
+                    f"Chat name could not be loaded for {chat_id}: {exc}",
+                    exc_info=True,
+                )
                 name = None
 
             label = str(name if name else "Yeni sohbet").strip()
@@ -163,6 +174,10 @@ def render_chat():
             messages = data_manager.chat.get_chat(chat_id) or []
         except Exception as exc:
             messages = []
+            Logger.error(
+                f"Chat history could not be loaded for {chat_id}: {exc}",
+                exc_info=True,
+            )
             st.error(f"Sohbet geçmişi yüklenemedi: {exc}")
 
         for item in messages:
@@ -197,16 +212,39 @@ def render_chat():
             #    "fonksiyonunun chat manager üzerinden bağlanması gerekiyor."
             #)
             
-            st.session_state.selected_chat_id = data_manager.chat.create_new_chat_with_msg(prompt)
+            try:
+                with st.spinner("Yanıt hazırlanıyor..."):
+                    st.session_state.selected_chat_id = (
+                        data_manager.chat.create_new_chat_with_msg(prompt)
+                    )
+            except Exception as exc:
+                Logger.error(f"Could not create a chat: {exc}", exc_info=True)
+                st.error(
+                    "Üzgünüz, yanıt hazırlanırken bir hata oluştu. "
+                    "Lütfen daha sonra tekrar deneyin."
+                )
+                return
 
-            st.rerun()    
+            st.rerun()
             return
 
-        data_manager.chat.add_message(
-            st.session_state.selected_chat_id,
-            "user",
-            prompt,
-        )
+        try:
+            with st.spinner("Yanıt hazırlanıyor..."):
+                data_manager.chat.add_message(
+                    st.session_state.selected_chat_id,
+                    "user",
+                    prompt,
+                )
+        except Exception as exc:
+            Logger.error(
+                f"Could not create a chat response: {exc}",
+                exc_info=True,
+            )
+            st.error(
+                "Üzgünüz, yanıt hazırlanırken bir hata oluştu. "
+                "Lütfen daha sonra tekrar deneyin."
+            )
+            return
 
         st.rerun()
         # Connect your existing LLM/chat service here.
@@ -258,6 +296,10 @@ def render_documents():
                             st.rerun()
 
                 except Exception as exc:
+                    Logger.error(
+                        f"Document upload failed for {filename}: {exc}",
+                        exc_info=True,
+                    )
                     st.error(f"Yükleme başarısız: {exc}")
 
     st.divider()
@@ -265,6 +307,7 @@ def render_documents():
     try:
         doc_ids = data_manager.document.get_doc_ids() or []
     except Exception as exc:
+        Logger.error(f"Document list could not be loaded: {exc}", exc_info=True)
         st.error(f"Doküman listesi alınamadı: {exc}")
         return
 
@@ -345,6 +388,10 @@ def render_documents():
                                 st.rerun()
 
                         except Exception as exc:
+                            Logger.error(
+                                f"Document rename failed for {filename}: {exc}",
+                                exc_info=True,
+                            )
                             st.error(f"Ad değiştirme başarısız: {exc}")
 
             if st.session_state.get(f"deleting_{doc_id}", False):
@@ -369,6 +416,10 @@ def render_documents():
                             st.success("Doküman silindi.")
                             st.rerun()
                         except Exception as exc:
+                            Logger.error(
+                                f"Document deletion failed for {filename}: {exc}",
+                                exc_info=True,
+                            )
                             st.error(f"Silme başarısız: {exc}")
 
                 with no_col:
@@ -383,25 +434,31 @@ def render_documents():
 
 
 def run():
-    st.set_page_config(
-        page_title="Axxon AI",
-        page_icon="✦",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
+    try:
+        st.set_page_config(
+            page_title="Axxon AI",
+            page_icon="✦",
+            layout="wide",
+            initial_sidebar_state="expanded",
+        )
 
-    if "selected_chat_id" not in st.session_state:
-        st.session_state.selected_chat_id = None
+        if "selected_chat_id" not in st.session_state:
+            st.session_state.selected_chat_id = None
 
-    render_sidebar()
+        render_sidebar()
 
-    tab_chat, tab_docs = st.tabs(["Sohbet", "Dokümanlar"])
+        tab_chat, tab_docs = st.tabs(["Sohbet", "Dokümanlar"])
 
-    with tab_chat:
-        render_chat()
+        with tab_chat:
+            render_chat()
 
-    with tab_docs:
-        render_documents()
+        with tab_docs:
+            render_documents()
+    except Exception as exc:
+        Logger.critical(f"Streamlit interface failed: {exc}", exc_info=True)
+        st.error(
+            "Beklenmeyen bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyin."
+        )
 
 
 if __name__ == "__main__":

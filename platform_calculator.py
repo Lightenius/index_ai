@@ -1,9 +1,10 @@
+import asyncio
 import re
 import time
 
 from logger import Logger
-from playwright.sync_api import (
-    sync_playwright,
+from playwright.async_api import (
+    async_playwright,
     Page,
     Frame,
     Error as PlaywrightError,
@@ -51,7 +52,7 @@ def _log_warning(message: str) -> None:
 # POPUP YÖNETİMİ
 # ============================================================
 
-def _click_accept_in_frame(frame: Frame) -> bool:
+async def _click_accept_in_frame(frame: Frame) -> bool:
     """
     Frame içinde görünür Accept butonu varsa tıklar.
     """
@@ -62,20 +63,24 @@ def _click_accept_in_frame(frame: Frame) -> bool:
             exact=True,
         )
 
-        for index in range(buttons.count()):
+        for index in range(await buttons.count()):
             button = buttons.nth(index)
 
-            if button.is_visible():
-                button.click(timeout=5000)
+            if await button.is_visible():
+                await button.click(timeout=5000)
                 return True
 
     except PlaywrightError:
+        Logger.error(
+            "Could not dismiss an Accept button in a page frame.",
+            exc_info=True,
+        )
         pass
 
     return False
 
 
-def dismiss_popups(page: Page) -> int:
+async def dismiss_popups(page: Page) -> int:
     """
     Important Note ve cookie gibi popup'ları kapatır.
     """
@@ -85,7 +90,7 @@ def dismiss_popups(page: Page) -> int:
         clicked = False
 
         for frame in page.frames:
-            if _click_accept_in_frame(frame):
+            if await _click_accept_in_frame(frame):
                 clicked_count += 1
                 clicked = True
 
@@ -93,7 +98,7 @@ def dismiss_popups(page: Page) -> int:
                     f"Accept geçildi ({clicked_count})."
                 )
 
-                page.wait_for_timeout(700)
+                await page.wait_for_timeout(700)
                 break
 
         if not clicked:
@@ -106,11 +111,11 @@ def dismiss_popups(page: Page) -> int:
 # SAYFA HAZIRLIK
 # ============================================================
 
-def wait_until_calculator_ready(page: Page) -> None:
+async def wait_until_calculator_ready(page: Page) -> None:
     """
     Calculator ana ekranının hazır olduğunu kontrol eder.
     """
-    page.get_by_text(
+    await page.get_by_text(
         "Please select your software",
         exact=False,
     ).first.wait_for(
@@ -125,7 +130,7 @@ def wait_until_calculator_ready(page: Page) -> None:
 # CALCULATOR INPUT'LARI
 # ============================================================
 
-def select_software(
+async def select_software(
     page: Page,
     software: str = "Axxon One (x64)",
 ) -> None:
@@ -138,15 +143,15 @@ def select_software(
         exact=True,
     )
 
-    radio.check()
-    page.wait_for_timeout(800)
+    await radio.check()
+    await page.wait_for_timeout(800)
 
     logger.info(
         f"Software seçildi: {software}"
     )
 
 
-def select_calculation_type(
+async def select_calculation_type(
     page: Page,
     calculation_type: str = "Server",
 ) -> None:
@@ -159,8 +164,8 @@ def select_calculation_type(
         exact=True,
     )
 
-    radio.check()
-    page.wait_for_timeout(800)
+    await radio.check()
+    await page.wait_for_timeout(800)
 
     logger.info(
         "Calculation type seçildi: "
@@ -168,7 +173,7 @@ def select_calculation_type(
     )
 
 
-def set_camera_count(
+async def set_camera_count(
     page: Page,
     camera_count: int,
 ) -> None:
@@ -197,19 +202,19 @@ def set_camera_count(
         '][id$="_input"]'
     ).first
 
-    camera_input.wait_for(
+    await camera_input.wait_for(
         state="visible",
         timeout=10000,
     )
 
-    old_value = camera_input.input_value()
+    old_value = await camera_input.input_value()
 
-    camera_input.fill(str(camera_count))
-    camera_input.press("Tab")
+    await camera_input.fill(str(camera_count))
+    await camera_input.press("Tab")
 
-    page.wait_for_timeout(1500)
+    await page.wait_for_timeout(1500)
 
-    new_value = camera_input.input_value()
+    new_value = await camera_input.input_value()
 
     if new_value != str(camera_count):
         raise RuntimeError(
@@ -223,7 +228,7 @@ def set_camera_count(
     )
 
 
-def set_archive_days(
+async def set_archive_days(
     page: Page,
     archive_days: int,
 ) -> None:
@@ -248,19 +253,19 @@ def set_archive_days(
         'archiveDays_input"]'
     )
 
-    archive_input.wait_for(
+    await archive_input.wait_for(
         state="visible",
         timeout=10000,
     )
 
-    old_value = archive_input.input_value()
+    old_value = await archive_input.input_value()
 
-    archive_input.fill(str(archive_days))
-    archive_input.press("Tab")
+    await archive_input.fill(str(archive_days))
+    await archive_input.press("Tab")
 
-    page.wait_for_timeout(1500)
+    await page.wait_for_timeout(1500)
 
-    new_value = archive_input.input_value()
+    new_value = await archive_input.input_value()
 
     if new_value != str(archive_days):
         raise RuntimeError(
@@ -287,7 +292,7 @@ SUPPORTED_RECORDING_PERCENTAGES = (
     100,
 )
 
-def set_recording_percentage(
+async def set_recording_percentage(
     page: Page,
     recording_percentage: int,
 ) -> None:
@@ -304,6 +309,11 @@ def set_recording_percentage(
         70  -> günün %70'inde kayıt
         100 -> sürekli kayıt
     """
+
+    if recording_percentage < 101:
+        rp = recording_percentage / 10.0
+        recording_percentage = round(rp) * 10
+
 
     # --------------------------------------------------------
     # TYPE VALIDATION
@@ -341,7 +351,7 @@ def set_recording_percentage(
         f'[id="{select_id}"]'
     )
 
-    select.wait_for(
+    await select.wait_for(
         state="attached",
         timeout=10000,
     )
@@ -354,14 +364,11 @@ def set_recording_percentage(
         "option"
     )
 
-    available_values = [
-        options.nth(index).get_attribute(
-            "value"
+    available_values = []
+    for index in range(await options.count()):
+        available_values.append(
+            await options.nth(index).get_attribute("value")
         )
-        for index in range(
-            options.count()
-        )
-    ]
 
     requested_value = str(
         recording_percentage
@@ -379,7 +386,7 @@ def set_recording_percentage(
     # ESKİ DEĞER
     # --------------------------------------------------------
 
-    old_value = select.input_value()
+    old_value = await select.input_value()
 
     # Zaten doğru değerdeyse tekrar AJAX tetikleme.
     if old_value == requested_value:
@@ -393,13 +400,13 @@ def set_recording_percentage(
     # YENİ DEĞERİ SEÇ
     # --------------------------------------------------------
 
-    select.select_option(
+    await select.select_option(
         value=requested_value,
         force=True,
     )
 
     # PrimeFaces / JSF AJAX işleminin tamamlanmasını bekle.
-    page.wait_for_timeout(
+    await page.wait_for_timeout(
         1500
     )
 
@@ -408,12 +415,12 @@ def set_recording_percentage(
         f'[id="{select_id}"]'
     )
 
-    select.wait_for(
+    await select.wait_for(
         state="attached",
         timeout=10000,
     )
 
-    new_value = select.input_value()
+    new_value = await select.input_value()
 
     # --------------------------------------------------------
     # DOĞRULAMA
@@ -432,7 +439,7 @@ def set_recording_percentage(
     )
 
 
-def _set_primefaces_select(
+async def _set_primefaces_select(
     page: Page,
     element_id: str,
     value: str,
@@ -446,17 +453,18 @@ def _set_primefaces_select(
         f'[id="{element_id}"]'
     )
 
-    select.wait_for(
+    await select.wait_for(
         state="attached",
         timeout=10000,
     )
 
     options = select.locator("option")
 
-    available_values = [
-        options.nth(i).get_attribute("value")
-        for i in range(options.count())
-    ]
+    available_values = []
+    for index in range(await options.count()):
+        available_values.append(
+            await options.nth(index).get_attribute("value")
+        )
 
     if value not in available_values:
         raise ValueError(
@@ -464,21 +472,21 @@ def _set_primefaces_select(
             f"Desteklenen değerler: {available_values}"
         )
 
-    old_value = select.input_value()
+    old_value = await select.input_value()
 
-    select.select_option(
+    await select.select_option(
         value=value,
         force=True,
     )
 
-    page.wait_for_timeout(1200)
+    await page.wait_for_timeout(1200)
 
     # AJAX ile element yeniden render edilmiş olabilir.
     select = page.locator(
         f'[id="{element_id}"]'
     )
 
-    new_value = select.input_value()
+    new_value = await select.input_value()
 
     if new_value != value:
         raise RuntimeError(
@@ -491,14 +499,14 @@ def _set_primefaces_select(
     )
 
 
-def set_resolution(
+async def set_resolution(
     page: Page,
     resolution: str,
 ) -> None:
     """
     İlk kamera grubunun ana stream çözünürlüğünü değiştirir.
     """
-    _set_primefaces_select(
+    await _set_primefaces_select(
         page=page,
         element_id=(
             "cameraGroupForm:cameras:"
@@ -511,7 +519,7 @@ def set_resolution(
     )
 
 
-def set_fps(
+async def set_fps(
     page: Page,
     fps: int,
 ) -> None:
@@ -532,7 +540,7 @@ def set_fps(
             "fps 1 ile 60 arasında olmalıdır."
         )
 
-    _set_primefaces_select(
+    await _set_primefaces_select(
         page=page,
         element_id=(
             "cameraGroupForm:cameras:"
@@ -545,7 +553,7 @@ def set_fps(
     )
 
 
-def set_codec(
+async def set_codec(
     page: Page,
     codec: str,
 ) -> None:
@@ -603,17 +611,17 @@ def set_codec(
         f'[id="{panel_id}"]'
     )
 
-    select.wait_for(
+    await select.wait_for(
         state="attached",
         timeout=10000,
     )
 
-    label.wait_for(
+    await label.wait_for(
         state="visible",
         timeout=10000,
     )
 
-    old_value = select.input_value()
+    old_value = await select.input_value()
 
     if old_value == normalized_codec:
         logger.info(
@@ -621,9 +629,9 @@ def set_codec(
         )
         return
 
-    label.click()
+    await label.click()
 
-    panel.wait_for(
+    await panel.wait_for(
         state="visible",
         timeout=5000,
     )
@@ -634,20 +642,20 @@ def set_codec(
         has_text=normalized_codec
     ).first
 
-    option.wait_for(
+    await option.wait_for(
         state="visible",
         timeout=5000,
     )
 
-    option.click()
+    await option.click()
 
-    page.wait_for_timeout(1800)
+    await page.wait_for_timeout(1800)
 
     select = page.locator(
         f'[id="{select_id}"]'
     )
 
-    new_value = select.input_value()
+    new_value = await select.input_value()
 
     if new_value != normalized_codec:
         raise RuntimeError(
@@ -661,7 +669,7 @@ def set_codec(
     )
 
 
-def get_site_bitrate(
+async def get_site_bitrate(
     page: Page,
 ) -> float:
     """
@@ -677,14 +685,13 @@ def get_site_bitrate(
         'cbrInput_input"]'
     )
 
-    bitrate_input.wait_for(
+    await bitrate_input.wait_for(
         state="visible",
         timeout=10000,
     )
 
     value = (
-        bitrate_input
-        .input_value()
+        (await bitrate_input.input_value())
         .strip()
         .replace(",", ".")
     )
@@ -708,7 +715,7 @@ def get_site_bitrate(
 # SONUÇ PARSE
 # ============================================================
 
-def parse_first_result(page: Page) -> dict:
+async def parse_first_result(page: Page) -> dict:
     """
     Recommended Platforms tablosundaki ilk platformu
     okuyup temiz bir Python dictionary olarak döndürür.
@@ -718,14 +725,14 @@ def parse_first_result(page: Page) -> dict:
         'tr[data-ri="0"]'
     ).first
 
-    first_row.wait_for(
+    await first_row.wait_for(
         state="visible",
         timeout=15000,
     )
 
     cells = first_row.locator("td")
 
-    if cells.count() < 7:
+    if await cells.count() < 7:
         raise RuntimeError(
             "Platform sonucu beklenen formatta değil."
         )
@@ -734,8 +741,7 @@ def parse_first_result(page: Page) -> dict:
 
     for index in range(7):
         text = (
-            cells.nth(index)
-            .inner_text()
+            (await cells.nth(index).inner_text())
             .strip()
             .replace("\n", " ")
         )
@@ -812,7 +818,7 @@ def parse_first_result(page: Page) -> dict:
 # ANA HESAPLAMA
 # ============================================================
 
-def calculate_platform(
+async def calculate_platform(
     camera_count: int,
     archive_days: int,
     resolution: str,
@@ -846,13 +852,13 @@ def calculate_platform(
             "AxxonSoft Calculator'ın hesapladığı bitrate kullanılacak."
         )
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
             headless=True
         )
 
         try:
-            page = browser.new_page(
+            page = await browser.new_page(
                 viewport={
                     "width": 1600,
                     "height": 1000,
@@ -868,7 +874,7 @@ def calculate_platform(
 
             for attempt in range(3):
                 try:
-                    page.goto(
+                    await page.goto(
                         CALCULATOR_URL,
                         wait_until="domcontentloaded",
                         timeout=60000,
@@ -887,68 +893,68 @@ def calculate_platform(
                             "3 denemede bağlanılamadı."
                         ) from error
 
-                    page.wait_for_timeout(2000)
+                    await page.wait_for_timeout(2000)
 
             logger.perf(
                 "Calculator sayfa yükleme süresi: "
                 f"{time.perf_counter() - load_start:.3f}s"
             )
 
-            page.wait_for_timeout(1500)
+            await page.wait_for_timeout(1500)
 
-            dismiss_popups(page)
-            wait_until_calculator_ready(page)
+            await dismiss_popups(page)
+            await wait_until_calculator_ready(page)
 
             # ----------------------------------------------------
             # PARAMETRELER
             # ----------------------------------------------------
             input_start = time.perf_counter()
 
-            select_software(
+            await select_software(
                 page,
                 software,
             )
 
-            select_calculation_type(
+            await select_calculation_type(
                 page,
                 calculation_type,
             )
 
-            set_camera_count(
+            await set_camera_count(
                 page,
                 camera_count,
             )
 
-            set_archive_days(
+            await set_archive_days(
                 page,
                 archive_days,
             )
 
-            set_recording_percentage(
+            await set_recording_percentage(
                 page,
                 recording_percentage,
             )
 
-            set_resolution(
+            await set_resolution(
                 page,
                 resolution,
             )
 
-            set_fps(
+            await set_fps(
                 page,
                 fps,
             )
 
-            set_codec(
+            await set_codec(
                 page,
                 codec,
             )
 
             # Resolution/FPS/Codec değişikliklerinden sonra
             # sitenin bitrate ve sonuçları yeniden hesaplamasını bekle.
-            page.wait_for_timeout(2500)
+            await page.wait_for_timeout(2500)
 
-            site_bitrate = get_site_bitrate(
+            site_bitrate = await get_site_bitrate(
                 page
             )
 
@@ -962,7 +968,7 @@ def calculate_platform(
             # ----------------------------------------------------
             result_start = time.perf_counter()
 
-            result = parse_first_result(
+            result = await parse_first_result(
                 page
             )
 
@@ -987,21 +993,27 @@ def calculate_platform(
             raise
 
         finally:
-            browser.close()
-
-            logger.perf(
-                "Platform Calculator toplam çalışma süresi: "
-                f"{time.perf_counter() - total_start:.3f}s"
-            )
+            try:
+                await browser.close()
+            except Exception as error:
+                Logger.error(
+                    f"Failed to close the calculator browser: {error}",
+                    exc_info=True,
+                )
+            finally:
+                logger.perf(
+                    "Platform Calculator toplam çalışma süresi: "
+                    f"{time.perf_counter() - total_start:.3f}s"
+                )
 
 
 # ============================================================
 # MANUEL TEST
 # ============================================================
 
-if __name__ == "__main__":
+async def main() -> None:
     try:
-        result = calculate_platform(
+        result = await calculate_platform(
             camera_count=10,
             archive_days=30,
             resolution="1920x1080",
@@ -1020,4 +1032,16 @@ if __name__ == "__main__":
     except Exception as error:
         logger.error(
             f"Test başarısız: {error}"
+        )
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        Logger.info("Keyboard interrupt received. Calculator stopped gracefully.")
+    except Exception as error:
+        Logger.critical(
+            f"Calculator stopped unexpectedly: {error}",
+            exc_info=True,
         )
