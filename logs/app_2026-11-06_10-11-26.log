@@ -1,0 +1,9 @@
+2026-11-06 10:11:26 | [35mSYSTEM  [0m | This is a test run of PDF module.
+2026-11-06 10:11:28 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf.txt
+2026-11-06 10:11:28 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf_paragraphs.txt
+2026-11-06 10:11:28 | [32mINFO    [0m | Starting cleanup for file: data/raw_manual.pdf.txt
+2026-11-06 10:11:28 | [35mSYSTEM  [0m | Raw file loaded successfully. Applying cleaning pipeline...
+2026-11-06 10:11:28 | [31mERROR   [0m | Failed to write output file clean_data/raw_manual.pdf.txt: [Errno 2] No such file or directory: 'clean_data/raw_manual.pdf.txt'
+2026-11-06 10:11:28 | [32mINFO    [0m | Starting cleanup for file: data/raw_manual.pdf_paragraphs.txt
+2026-11-06 10:11:28 | [35mSYSTEM  [0m | Raw file loaded successfully. Applying cleaning pipeline...
+2026-11-06 10:11:28 | [31mERROR   [0m | Failed to write output file clean_data/raw_manual.pdf_paragraphs.txt: [Errno 2] No such file or directory: 'clean_data/raw_manual.pdf_paragraphs.txt'

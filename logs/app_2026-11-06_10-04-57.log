@@ -1,0 +1,3 @@
+2026-11-06 10:04:57 | [35mSYSTEM  [0m | This is a test run of PDF module.
+2026-11-06 10:04:58 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf.txt
+2026-11-06 10:04:58 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf_paragraphs.txt

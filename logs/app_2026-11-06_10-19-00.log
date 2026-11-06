@@ -1,0 +1,14 @@
+2026-11-06 10:19:00 | [35mSYSTEM  [0m | This is a test run of PDF module.
+2026-11-06 10:19:02 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf.txt
+2026-11-06 10:19:02 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf_paragraphs.txt
+2026-11-06 10:19:02 | [32mINFO    [0m | Extracted text from data/raw_manual.pdf and saved to data/raw_manual.pdf_pages.txt
+2026-11-06 10:19:02 | [32mINFO    [0m | Starting cleanup for file: data/raw_manual.pdf.txt
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | Raw file loaded successfully. Applying cleaning pipeline...
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | Cleanup complete. Saved clean text to: data/raw_manual.pdf_clean.txt
+2026-11-06 10:19:02 | [32mINFO    [0m | Starting cleanup for file: data/raw_manual.pdf_paragraphs.txt
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | Raw file loaded successfully. Applying cleaning pipeline...
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | Cleanup complete. Saved clean text to: data/raw_manual.pdf_paragraphs_clean.txt
+2026-11-06 10:19:02 | [32mINFO    [0m | Starting cleanup for file: data/raw_manual.pdf_pages.txt
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | Raw file loaded successfully. Applying cleaning pipeline...
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | Cleanup complete. Saved clean text to: data/raw_manual.pdf_pages_clean.txt
+2026-11-06 10:19:02 | [35mSYSTEM  [0m | PDF module test run completed in 2.1400888999924064 milliseconds.
