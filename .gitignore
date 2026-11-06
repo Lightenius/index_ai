@@ -3,3 +3,9 @@ __pycache__/
 
 *.pdf
 .env
+
+*.log
+
+*.db
+
+page_log.txt

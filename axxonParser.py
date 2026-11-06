@@ -61,31 +61,26 @@ class TextCleaner:
 
 
 def get_raw_text_from_pdf(pdf_path):
-    doc = pymupdf.open(pdf_path)
+    try:
+        doc = pymupdf.open(pdf_path)
+    except Exception as e:
+        Logger.error(f"Failed to open PDF file {pdf_path}: {e}")
+        return ""
+
     all_text = ""
     for i, _ in enumerate(doc):
         text = doc.get_page_text(i)
         all_text += text
     return all_text
 
-def get_paragraphs(pdf_path) -> List[str]:
-    text = get_raw_text_from_pdf(pdf_path)
-
-    si, ei = 0, 0
-    paragraphs = []
-    p_num = 0
-    while ei < len(text):
-        if text[ei] == "\u2029":
-            if ei - si > 1:
-                paragraphs.append("{\n\tparagraph_number: " + str(p_num) + "\n\tcontent: " + text[si:ei].strip() + "\n}")
-                p_num += 1
-            si = ei + 1
-        ei += 1
-
-    return paragraphs
 
 def get_pages(pdf_path) -> List[Dict[str, str]]:
-    doc = pymupdf.open(pdf_path)
+    try:
+        doc = pymupdf.open(pdf_path)
+    except Exception as e:
+        Logger.error(f"Failed to open PDF file {pdf_path}: {e}")
+        return []
+
     pages = []
     for i, _ in enumerate(doc):
         text = doc.get_page_text(i)
@@ -95,6 +90,17 @@ def get_pages(pdf_path) -> List[Dict[str, str]]:
             "content": text.strip()
             }
         )
+
+    # DEBUG
+    i= 0
+    f = open("logs/page_log.txt", "w", encoding="utf-8")
+    for page in pages:
+        i += 1 if i!=0 else 0
+        if i % 10 != 0: continue
+        f.write(f"Page No: {page['page_number']} content: {page['content']}\n\n")
+    f.close()
+    Logger.debug("Saved sample page content to logs/page_log.txt for debugging.")
+
     return pages
 
 
@@ -107,16 +113,12 @@ if __name__ == "__main__":
         Logger.error("Please provide a PDF file path as an argument.")
         sys.exit(1)
     raw_text = get_raw_text_from_pdf(pdf_path)
-    p_text = "\n".join(get_paragraphs(pdf_path))
-    page_text = "\n\n\n".join(get_pages(pdf_path))
+    page_text = str(get_pages(pdf_path))
 
     f = open(f"{pdf_path}.txt", "w", encoding="utf-8")
     f.write(raw_text)
     f.close()
-    f = open(f"{pdf_path}_paragraphs.txt", "w", encoding="utf-8")
-    f.write(p_text)
-    f.close()
-
+    
     f = open(f"{pdf_path}_pages.txt", "w", encoding="utf-8")
     f.write(page_text)
     f.close()
@@ -128,4 +130,4 @@ if __name__ == "__main__":
     TextCleaner.clean_text_file(f"{pdf_path}_paragraphs.txt", f"{pdf_path}_paragraphs_clean.txt")
     TextCleaner.clean_text_file(f"{pdf_path}_pages.txt", f"{pdf_path}_pages_clean.txt")
     end_time = time.perf_counter()
-    Logger.system(f"PDF module test run completed in {end_time - start_time:.3f} seconds.")
+    Logger.perf(f"PDF module test run completed in {end_time - start_time:.3f} seconds.")
