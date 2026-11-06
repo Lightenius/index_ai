@@ -1,8 +1,7 @@
-# Axxon Platform Calculator'ın formülü çözülmeli veya bir şekilde kaynak kodu elde edilmeli.
-# Veya alternatif olarak yapoay zekaya o web sitesini kullandırmanın bir yolu bulunmalı.
-
 import re
+import time
 
+from logger import Logger
 from playwright.sync_api import (
     sync_playwright,
     Page,
@@ -11,9 +10,41 @@ from playwright.sync_api import (
 )
 
 
+logger = Logger()
+
 CALCULATOR_URL = (
     "https://sale.axxonsoft.com/calc/calculator.jsf"
 )
+
+
+# ============================================================
+# LOGGER YARDIMCILARI
+# ============================================================
+
+def _log_system(message: str) -> None:
+    """
+    Logger sınıfında system seviyesi varsa onu kullanır.
+    Yoksa INFO seviyesine düşer.
+    """
+    system_method = getattr(logger, "system", None)
+
+    if callable(system_method):
+        system_method(message)
+    else:
+        logger.info(message)
+
+
+def _log_warning(message: str) -> None:
+    """
+    Logger sınıfında warning seviyesi varsa onu kullanır.
+    Yoksa INFO seviyesine düşer.
+    """
+    warning_method = getattr(logger, "warning", None)
+
+    if callable(warning_method):
+        warning_method(message)
+    else:
+        logger.info(message)
 
 
 # ============================================================
@@ -24,7 +55,6 @@ def _click_accept_in_frame(frame: Frame) -> bool:
     """
     Frame içinde görünür Accept butonu varsa tıklar.
     """
-
     try:
         buttons = frame.get_by_role(
             "button",
@@ -36,10 +66,7 @@ def _click_accept_in_frame(frame: Frame) -> bool:
             button = buttons.nth(index)
 
             if button.is_visible():
-                button.click(
-                    timeout=5000
-                )
-
+                button.click(timeout=5000)
                 return True
 
     except PlaywrightError:
@@ -52,7 +79,6 @@ def dismiss_popups(page: Page) -> int:
     """
     Important Note ve cookie gibi popup'ları kapatır.
     """
-
     clicked_count = 0
 
     for _ in range(5):
@@ -63,14 +89,11 @@ def dismiss_popups(page: Page) -> int:
                 clicked_count += 1
                 clicked = True
 
-                print(
+                logger.info(
                     f"Accept geçildi ({clicked_count})."
                 )
 
-                page.wait_for_timeout(
-                    700
-                )
-
+                page.wait_for_timeout(700)
                 break
 
         if not clicked:
@@ -87,7 +110,6 @@ def wait_until_calculator_ready(page: Page) -> None:
     """
     Calculator ana ekranının hazır olduğunu kontrol eder.
     """
-
     page.get_by_text(
         "Please select your software",
         exact=False,
@@ -95,6 +117,8 @@ def wait_until_calculator_ready(page: Page) -> None:
         state="visible",
         timeout=15000,
     )
+
+    logger.info("Calculator hazır.")
 
 
 # ============================================================
@@ -108,7 +132,6 @@ def select_software(
     """
     Kullanılacak AxxonSoft yazılımını seçer.
     """
-
     radio = page.get_by_role(
         "radio",
         name=software,
@@ -116,12 +139,9 @@ def select_software(
     )
 
     radio.check()
+    page.wait_for_timeout(800)
 
-    page.wait_for_timeout(
-        800
-    )
-
-    print(
+    logger.info(
         f"Software seçildi: {software}"
     )
 
@@ -133,7 +153,6 @@ def select_calculation_type(
     """
     Hesaplama tipini seçer.
     """
-
     radio = page.get_by_role(
         "radio",
         name=calculation_type,
@@ -141,13 +160,10 @@ def select_calculation_type(
     )
 
     radio.check()
+    page.wait_for_timeout(800)
 
-    page.wait_for_timeout(
-        800
-    )
-
-    print(
-        f"Calculation type seçildi: "
+    logger.info(
+        "Calculation type seçildi: "
         f"{calculation_type}"
     )
 
@@ -159,8 +175,10 @@ def set_camera_count(
     """
     İlk kamera grubunun kamera sayısını değiştirir.
     """
-
-    if not isinstance(camera_count, int):
+    if isinstance(camera_count, bool) or not isinstance(
+        camera_count,
+        int,
+    ):
         raise ValueError(
             "camera_count integer olmalıdır."
         )
@@ -186,24 +204,21 @@ def set_camera_count(
 
     old_value = camera_input.input_value()
 
-    camera_input.fill(
-        str(camera_count)
-    )
+    camera_input.fill(str(camera_count))
+    camera_input.press("Tab")
 
-    # PrimeFaces değişikliği çoğu zaman blur/change
-    # olayında gönderdiği için input'tan çıkıyoruz.
-    camera_input.press(
-        "Tab"
-    )
-
-    page.wait_for_timeout(
-        1500
-    )
+    page.wait_for_timeout(1500)
 
     new_value = camera_input.input_value()
 
-    print(
-        f"Kamera sayısı: "
+    if new_value != str(camera_count):
+        raise RuntimeError(
+            "Kamera sayısı değiştirilemedi. "
+            f"Beklenen: {camera_count}, mevcut: {new_value}"
+        )
+
+    logger.info(
+        "Kamera sayısı: "
         f"{old_value} -> {new_value}"
     )
 
@@ -215,8 +230,10 @@ def set_archive_days(
     """
     Arşiv süresini gün cinsinden değiştirir.
     """
-
-    if not isinstance(archive_days, int):
+    if isinstance(archive_days, bool) or not isinstance(
+        archive_days,
+        int,
+    ):
         raise ValueError(
             "archive_days integer olmalıdır."
         )
@@ -238,25 +255,182 @@ def set_archive_days(
 
     old_value = archive_input.input_value()
 
-    archive_input.fill(
-        str(archive_days)
+    archive_input.fill(str(archive_days))
+    archive_input.press("Tab")
+
+    page.wait_for_timeout(1500)
+
+    new_value = archive_input.input_value()
+
+    if new_value != str(archive_days):
+        raise RuntimeError(
+            "Archive days değiştirilemedi. "
+            f"Beklenen: {archive_days}, mevcut: {new_value}"
+        )
+
+    logger.info(
+        "Archive days: "
+        f"{old_value} -> {new_value}"
     )
 
-    archive_input.press(
-        "Tab"
+SUPPORTED_RECORDING_PERCENTAGES = (
+    0,
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+)
+
+def set_recording_percentage(
+    page: Page,
+    recording_percentage: int,
+) -> None:
+    """
+    Günlük kayıt yüzdesini Axxon Platform Calculator içindeki
+    archivePercentInputEng alanı üzerinden ayarlar.
+
+    Desteklenen değerler:
+        0, 10, 20, 30, 40, 50,
+        60, 70, 80, 90, 100
+
+    Örnek:
+        50  -> günün %50'sinde kayıt
+        70  -> günün %70'inde kayıt
+        100 -> sürekli kayıt
+    """
+
+    # --------------------------------------------------------
+    # TYPE VALIDATION
+    # --------------------------------------------------------
+
+    if isinstance(recording_percentage, bool) or not isinstance(
+        recording_percentage,
+        int,
+    ):
+        raise ValueError(
+            "recording_percentage integer olmalıdır."
+        )
+
+    # --------------------------------------------------------
+    # SUPPORTED VALUE VALIDATION
+    # --------------------------------------------------------
+
+    if recording_percentage not in SUPPORTED_RECORDING_PERCENTAGES:
+        raise ValueError(
+            "recording_percentage şu değerlerden biri olmalıdır: "
+            f"{SUPPORTED_RECORDING_PERCENTAGES}"
+        )
+
+    # --------------------------------------------------------
+    # CALCULATOR SELECT ELEMENT
+    # --------------------------------------------------------
+
+    select_id = (
+        "archiveForm:"
+        "vendor-and-archice-settings:"
+        "archivePercentInputEng_input"
     )
 
+    select = page.locator(
+        f'[id="{select_id}"]'
+    )
+
+    select.wait_for(
+        state="attached",
+        timeout=10000,
+    )
+
+    # --------------------------------------------------------
+    # SİTENİN GERÇEKTEN DESTEKLEDİĞİ DEĞERLERİ KONTROL ET
+    # --------------------------------------------------------
+
+    options = select.locator(
+        "option"
+    )
+
+    available_values = [
+        options.nth(index).get_attribute(
+            "value"
+        )
+        for index in range(
+            options.count()
+        )
+    ]
+
+    requested_value = str(
+        recording_percentage
+    )
+
+    if requested_value not in available_values:
+        raise RuntimeError(
+            "Axxon Platform Calculator beklenen kayıt yüzdesini "
+            "desteklemiyor. "
+            f"İstenen: {recording_percentage}, "
+            f"Site seçenekleri: {available_values}"
+        )
+
+    # --------------------------------------------------------
+    # ESKİ DEĞER
+    # --------------------------------------------------------
+
+    old_value = select.input_value()
+
+    # Zaten doğru değerdeyse tekrar AJAX tetikleme.
+    if old_value == requested_value:
+        logger.info(
+            "Günlük kayıt yüzdesi zaten seçili: "
+            f"{recording_percentage}%"
+        )
+        return
+
+    # --------------------------------------------------------
+    # YENİ DEĞERİ SEÇ
+    # --------------------------------------------------------
+
+    select.select_option(
+        value=requested_value,
+        force=True,
+    )
+
+    # PrimeFaces / JSF AJAX işleminin tamamlanmasını bekle.
     page.wait_for_timeout(
         1500
     )
 
-    new_value = archive_input.input_value()
-
-    print(
-        f"Archive days: "
-        f"{old_value} -> {new_value}"
+    # AJAX sonrasında element yeniden render edilmiş olabilir.
+    select = page.locator(
+        f'[id="{select_id}"]'
     )
-    
+
+    select.wait_for(
+        state="attached",
+        timeout=10000,
+    )
+
+    new_value = select.input_value()
+
+    # --------------------------------------------------------
+    # DOĞRULAMA
+    # --------------------------------------------------------
+
+    if new_value != requested_value:
+        raise RuntimeError(
+            "Günlük kayıt yüzdesi değiştirilemedi. "
+            f"Beklenen: {requested_value}%, "
+            f"mevcut: {new_value}%"
+        )
+
+    logger.info(
+        "Günlük kayıt yüzdesi: "
+        f"{old_value}% -> {new_value}%"
+    )
+
 
 def _set_primefaces_select(
     page: Page,
@@ -267,11 +441,7 @@ def _set_primefaces_select(
     """
     PrimeFaces ui-selectOneMenu bileşeninin arkasındaki
     hidden <select> elementinin değerini değiştirir.
-
-    select_option() input/change eventlerini de tetiklediği için
-    JSF/PrimeFaces hesaplaması güncellenir.
     """
-
     select = page.locator(
         f'[id="{element_id}"]'
     )
@@ -301,8 +471,11 @@ def _set_primefaces_select(
         force=True,
     )
 
-    page.wait_for_timeout(
-        1200
+    page.wait_for_timeout(1200)
+
+    # AJAX ile element yeniden render edilmiş olabilir.
+    select = page.locator(
+        f'[id="{element_id}"]'
     )
 
     new_value = select.input_value()
@@ -313,7 +486,7 @@ def _set_primefaces_select(
             f"Beklenen: {value}, mevcut: {new_value}"
         )
 
-    print(
+    logger.info(
         f"{field_name}: {old_value} -> {new_value}"
     )
 
@@ -324,13 +497,7 @@ def set_resolution(
 ) -> None:
     """
     İlk kamera grubunun ana stream çözünürlüğünü değiştirir.
-
-    Örnek:
-        1920x1080
-        2688x1520
-        3840x2160
     """
-
     _set_primefaces_select(
         page=page,
         element_id=(
@@ -350,11 +517,12 @@ def set_fps(
 ) -> None:
     """
     İlk kamera grubunun FPS değerini değiştirir.
-
     Calculator 1-60 FPS destekliyor.
     """
-
-    if not isinstance(fps, int):
+    if isinstance(fps, bool) or not isinstance(
+        fps,
+        int,
+    ):
         raise ValueError(
             "fps integer olmalıdır."
         )
@@ -385,7 +553,6 @@ def set_codec(
     Codec değerini PrimeFaces'in görünür dropdown'ı
     üzerinden gerçek kullanıcı gibi seçer.
     """
-
     codec_mapping = {
         "H264": "H264",
         "H.264": "H264",
@@ -448,14 +615,12 @@ def set_codec(
 
     old_value = select.input_value()
 
-    # Zaten istenen codec seçiliyse tekrar işlem yapma.
     if old_value == normalized_codec:
-        print(
+        logger.info(
             f"Codec zaten seçili: {normalized_codec}"
         )
         return
 
-    # PrimeFaces dropdown'ını gerçek kullanıcı gibi aç.
     label.click()
 
     panel.wait_for(
@@ -463,7 +628,6 @@ def set_codec(
         timeout=5000,
     )
 
-    # Açılan listedeki gerçek seçeneği tıkla.
     option = panel.locator(
         "li.ui-selectonemenu-item"
     ).filter(
@@ -477,13 +641,8 @@ def set_codec(
 
     option.click()
 
-    # PrimeFaces / JSF AJAX işleminin tamamlanması için.
-    page.wait_for_timeout(
-        1800
-    )
+    page.wait_for_timeout(1800)
 
-    # Ajax sırasında widget yeniden render edilmiş olabilir,
-    # bu yüzden locator'ı yeniden alıyoruz.
     select = page.locator(
         f'[id="{select_id}"]'
     )
@@ -492,38 +651,25 @@ def set_codec(
 
     if new_value != normalized_codec:
         raise RuntimeError(
-            f"Codec değiştirilemedi. "
+            "Codec değiştirilemedi. "
             f"Beklenen: {normalized_codec}, "
             f"mevcut: {new_value}"
         )
 
-    print(
+    logger.info(
         f"Codec: {old_value} -> {new_value}"
     )
 
 
-def set_bitrate(
+def get_site_bitrate(
     page: Page,
-    bitrate_mbps: float,
-) -> None:
+) -> float:
     """
-    İlk kamera grubunun bitrate değerini Mbit/s olarak değiştirir.
-    PrimeFaces input olduğu için gerçek klavye girişini taklit eder.
+    Resolution/FPS/Codec değerlerine göre calculator'ın
+    otomatik belirlediği tek kamera bitrate değerini okur.
+
+    Bu fonksiyon bitrate'i DEĞİŞTİRMEZ.
     """
-
-    if not isinstance(
-        bitrate_mbps,
-        (int, float),
-    ):
-        raise ValueError(
-            "bitrate_mbps sayı olmalıdır."
-        )
-
-    if bitrate_mbps <= 0:
-        raise ValueError(
-            "bitrate_mbps 0'dan büyük olmalıdır."
-        )
-
     bitrate_input = page.locator(
         '[id="cameraGroupForm:cameras:'
         'cameraGroupPanel:0:'
@@ -536,160 +682,37 @@ def set_bitrate(
         timeout=10000,
     )
 
-    old_value = bitrate_input.input_value()
-
-    
-
-    # Gerçek kullanıcı gibi alanı seçiyoruz.
-    bitrate_input.click()
-
-    bitrate_input.press(
-        "Control+A"
+    value = (
+        bitrate_input
+        .input_value()
+        .strip()
+        .replace(",", ".")
     )
 
-    bitrate_input.type(
-        str(bitrate_mbps),
-        delay=100,
+    try:
+        bitrate = float(value)
+    except ValueError as error:
+        raise RuntimeError(
+            f"Site bitrate değeri okunamadı: {value!r}"
+        ) from error
+
+    logger.info(
+        "Site tarafından hesaplanan bitrate: "
+        f"{bitrate:.2f} Mbit/s"
     )
 
-    # AJAX çalışmadan hemen önce gerçekten ne yazıldığını görelim.
-    typed_value = bitrate_input.input_value()
+    return bitrate
 
-
-    # PrimeFaces change/blur olayını tetikle.
-    bitrate_input.press(
-        "Tab"
-    )
-
-    page.wait_for_timeout(
-        2000
-    )
-
-    final_value = bitrate_input.input_value()
-
-    print(
-    f"Bitrate: {old_value} -> "
-    f"{final_value} Mbit/s"
-)
 
 # ============================================================
-# SONUÇ KONTROLÜ
+# SONUÇ PARSE
 # ============================================================
-def inspect_stream_widgets(page: Page) -> None:
-    """
-    İlk kamera grubunun ana stream'ine ait
-    Resolution, FPS ve Codec PrimeFaces bileşenlerini inceler.
-
-    Amaç:
-        - Gerçek element ID'lerini bulmak
-        - Hidden select/input yapılarını görmek
-        - Kullanılabilecek option value'larını çıkarmak
-    """
-
-    print("\n")
-    print("=" * 70)
-    print("STREAM WIDGET ANALİZİ")
-    print("=" * 70)
-
-    widget_names = [
-        "resolutionInput",
-        "fpsInput",
-        "codecInput",
-    ]
-
-    for widget_name in widget_names:
-
-        print("\n")
-        print("#" * 70)
-        print(widget_name)
-        print("#" * 70)
-
-        # Sadece ilk kamera grubunun ANA stream'i.
-        # childCameras altındaki ikinci stream'i almıyoruz.
-        elements = page.locator(
-            f'[id*="cameraGroupPanel:0:cameraRequestForm:{widget_name}"]'
-        )
-
-        print(
-            f"Bulunan element sayısı: {elements.count()}"
-        )
-
-        for index in range(elements.count()):
-            element = elements.nth(index)
-
-            try:
-                tag = element.evaluate(
-                    "(el) => el.tagName.toLowerCase()"
-                )
-
-                element_id = element.get_attribute("id")
-                name = element.get_attribute("name")
-                element_type = element.get_attribute("type")
-                class_name = element.get_attribute("class")
-                role = element.get_attribute("role")
-
-                visible = element.is_visible()
-
-                try:
-                    value = element.input_value()
-                except Exception:
-                    value = None
-
-                try:
-                    text = element.inner_text().strip()
-                except Exception:
-                    text = ""
-
-                print("\n" + "-" * 70)
-                print(f"INDEX   : {index}")
-                print(f"TAG     : {tag}")
-                print(f"ID      : {element_id}")
-                print(f"NAME    : {name}")
-                print(f"TYPE    : {element_type}")
-                print(f"CLASS   : {class_name}")
-                print(f"ROLE    : {role}")
-                print(f"VISIBLE : {visible}")
-                print(f"VALUE   : {value}")
-                print(f"TEXT    : {text}")
-
-                # Eğer gerçek bir <select> ise option'ları da çıkar.
-                if tag == "select":
-                    options = element.locator("option")
-
-                    print(
-                        f"OPTION SAYISI: {options.count()}"
-                    )
-
-                    for option_index in range(
-                        options.count()
-                    ):
-                        option = options.nth(
-                            option_index
-                        )
-
-                        option_text = (
-                            option.inner_text().strip()
-                        )
-
-                        option_value = (
-                            option.get_attribute("value")
-                        )
-
-                        print(
-                            f"    [{option_index}] "
-                            f"text={option_text!r} "
-                            f"value={option_value!r}"
-                        )
-
-            except PlaywrightError:
-                continue
 
 def parse_first_result(page: Page) -> dict:
     """
     Recommended Platforms tablosundaki ilk platformu
     okuyup temiz bir Python dictionary olarak döndürür.
     """
-
     first_row = page.locator(
         '[id="results:results-form:recommended-platforms"] '
         'tr[data-ri="0"]'
@@ -717,22 +740,13 @@ def parse_first_result(page: Page) -> dict:
             .replace("\n", " ")
         )
 
-        # Birden fazla boşluğu tek boşluğa indir.
-        text = " ".join(
-            text.split()
-        )
-
+        text = " ".join(text.split())
         values.append(text)
 
-    # --------------------------------------------------------
-    # Archive
-    # Örnek:
+    # Archive örneği:
     # 11.59 TB (HDD marked capacity 12.75 TB)
-    # --------------------------------------------------------
-
     archive_match = re.search(
-        r"([\d.]+)\s*TB.*?"
-        r"([\d.]+)\s*TB",
+        r"([\d.]+)\s*TB.*?([\d.]+)\s*TB",
         values[4],
     )
 
@@ -749,12 +763,6 @@ def parse_first_result(page: Page) -> dict:
         archive_match.group(2)
     )
 
-    # --------------------------------------------------------
-    # Recording
-    # Örnek:
-    # 50.0 Mbit/s
-    # --------------------------------------------------------
-
     recording_match = re.search(
         r"([\d.]+)",
         values[5],
@@ -768,12 +776,6 @@ def parse_first_result(page: Page) -> dict:
     recording_mbps = float(
         recording_match.group(1)
     )
-
-    # --------------------------------------------------------
-    # LAN
-    # Örnek:
-    # 64.9 / 14.9 Mbit/s
-    # --------------------------------------------------------
 
     lan_match = re.search(
         r"([\d.]+)\s*/\s*([\d.]+)",
@@ -793,11 +795,7 @@ def parse_first_result(page: Page) -> dict:
         lan_match.group(2)
     )
 
-    # --------------------------------------------------------
-    # Temiz sonuç
-    # --------------------------------------------------------
-
-    result = {
+    return {
         "servers": int(values[0]),
         "cpu": values[1],
         "cpu_load": values[2],
@@ -809,7 +807,10 @@ def parse_first_result(page: Page) -> dict:
         "lan_out_mbps": lan_out_mbps,
     }
 
-    return result
+
+# ============================================================
+# ANA HESAPLAMA
+# ============================================================
 
 def calculate_platform(
     camera_count: int,
@@ -820,19 +821,32 @@ def calculate_platform(
     bitrate_mbps: float | None = None,
     software: str = "Axxon One (x64)",
     calculation_type: str = "Server",
+    recording_percentage: int = 50,
 ) -> dict:
     """
-    AxxonSoft Platform Calculator'ı headless browser ile
-    arka planda kullanır ve ilk önerilen platformu döndürür.
+    AxxonSoft Platform Calculator'ı headless browser ile çalıştırır
+    ve ilk önerilen platformu dictionary olarak döndürür.
 
-    Kullanıcı browser penceresi görmez.
-
-    Bitrate None verilirse calculator'ın mevcut/default
-    bitrate değeri kullanılır.
+    Önemli:
+    - bitrate_mbps yalnızca eski çağrılar bozulmasın diye tutulur.
+    - Manuel bitrate hiçbir zaman siteye yazılmaz.
+    - Bitrate her zaman calculator'ın Resolution/FPS/Codec'e göre
+      kendi hesapladığı değer olarak okunur.
+    - recording_percentage 0-100 arasında ayarlanabilir.
     """
+    total_start = time.perf_counter()
+
+    _log_system(
+        "Axxon Platform Calculator başlatılıyor."
+    )
+
+    if bitrate_mbps is not None:
+        logger.info(
+            "Manuel bitrate parametresi yok sayıldı; "
+            "AxxonSoft Calculator'ın hesapladığı bitrate kullanılacak."
+        )
 
     with sync_playwright() as p:
-
         browser = p.chromium.launch(
             headless=True
         )
@@ -845,17 +859,12 @@ def calculate_platform(
                 }
             )
 
-            page.set_default_timeout(
-                10000
-            )
+            page.set_default_timeout(10000)
 
-            print(
-                "Axxon Platform Calculator çalıştırılıyor..."
-            )
-
-            # ------------------------------------------------
-            # SAYFAYA BAĞLAN
-            # ------------------------------------------------
+            # ----------------------------------------------------
+            # SAYFA YÜKLEME
+            # ----------------------------------------------------
+            load_start = time.perf_counter()
 
             for attempt in range(3):
                 try:
@@ -864,15 +873,12 @@ def calculate_platform(
                         wait_until="domcontentloaded",
                         timeout=60000,
                     )
-
                     break
 
                 except PlaywrightError as error:
-
-                    print(
-                        f"Bağlantı denemesi "
-                        f"{attempt + 1} başarısız: "
-                        f"{error}"
+                    _log_warning(
+                        "Calculator bağlantı denemesi "
+                        f"{attempt + 1} başarısız: {error}"
                     )
 
                     if attempt == 2:
@@ -881,260 +887,137 @@ def calculate_platform(
                             "3 denemede bağlanılamadı."
                         ) from error
 
-                    page.wait_for_timeout(
-                        2000
-                    )
+                    page.wait_for_timeout(2000)
 
-            # ------------------------------------------------
-            # SAYFAYI HAZIRLA
-            # ------------------------------------------------
-
-            page.wait_for_timeout(
-                1500
+            logger.perf(
+                "Calculator sayfa yükleme süresi: "
+                f"{time.perf_counter() - load_start:.3f}s"
             )
 
-            dismiss_popups(
-                page
-            )
+            page.wait_for_timeout(1500)
 
-            wait_until_calculator_ready(
-                page
-            )
+            dismiss_popups(page)
+            wait_until_calculator_ready(page)
 
-            # ------------------------------------------------
-            # SOFTWARE
-            # ------------------------------------------------
+            # ----------------------------------------------------
+            # PARAMETRELER
+            # ----------------------------------------------------
+            input_start = time.perf_counter()
 
             select_software(
                 page,
                 software,
             )
 
-            # ------------------------------------------------
-            # CALCULATION TYPE
-            # ------------------------------------------------
-
             select_calculation_type(
                 page,
                 calculation_type,
             )
-
-            # ------------------------------------------------
-            # CAMERA COUNT
-            # ------------------------------------------------
 
             set_camera_count(
                 page,
                 camera_count,
             )
 
-            # ------------------------------------------------
-            # ARCHIVE DAYS
-            # ------------------------------------------------
-
             set_archive_days(
                 page,
                 archive_days,
             )
 
-            # ------------------------------------------------
-            # RESOLUTION
-            # ------------------------------------------------
+            set_recording_percentage(
+                page,
+                recording_percentage,
+            )
 
             set_resolution(
                 page,
                 resolution,
             )
 
-            # ------------------------------------------------
-            # FPS
-            # ------------------------------------------------
-
             set_fps(
                 page,
                 fps,
             )
-
-            # ------------------------------------------------
-            # CODEC
-            # ------------------------------------------------
 
             set_codec(
                 page,
                 codec,
             )
 
-            # ------------------------------------------------
-            # BITRATE
-            # ------------------------------------------------
+            # Resolution/FPS/Codec değişikliklerinden sonra
+            # sitenin bitrate ve sonuçları yeniden hesaplamasını bekle.
+            page.wait_for_timeout(2500)
 
-            if bitrate_mbps is not None:
-
-                set_bitrate(
-                    page,
-                    bitrate_mbps,
-                )
-
-            else:
-
-                print(
-                    "Bitrate belirtilmedi; "
-                    "calculator varsayılan değeri kullanılacak."
-                )
-
-            # ------------------------------------------------
-            # SONUÇLARIN GÜNCELLENMESİNİ BEKLE
-            # ------------------------------------------------
-
-            page.wait_for_timeout(
-                2500
+            site_bitrate = get_site_bitrate(
+                page
             )
 
-            # ------------------------------------------------
-            # SONUCU OKU
-            # ------------------------------------------------
+            logger.perf(
+                "Calculator parametre giriş süresi: "
+                f"{time.perf_counter() - input_start:.3f}s"
+            )
+
+            # ----------------------------------------------------
+            # SONUÇ
+            # ----------------------------------------------------
+            result_start = time.perf_counter()
 
             result = parse_first_result(
                 page
             )
 
+            result["camera_bitrate_mbps"] = site_bitrate
+            result["recording_percentage"] = recording_percentage
+
+            logger.perf(
+                "Calculator sonuç okuma süresi: "
+                f"{time.perf_counter() - result_start:.3f}s"
+            )
+
+            _log_system(
+                "Platform hesabı başarıyla tamamlandı."
+            )
+
             return result
 
-        finally:
-            browser.close()
-# ============================================================
-# TEST
-# ============================================================
-
-def test_calculator_inputs() -> None:
-    """
-    Headless calculator üzerinde ilk otomatik
-    input testini gerçekleştirir.
-    """
-
-    with sync_playwright() as p:
-
-        browser = p.chromium.launch(
-            headless=True
-        )
-
-        try:
-            page = browser.new_page(
-                viewport={
-                    "width": 1600,
-                    "height": 1000,
-                }
+        except Exception as error:
+            logger.error(
+                f"Platform hesabı başarısız: {error}"
             )
-
-            page.set_default_timeout(
-                10000
-            )
-
-            print(
-                "Calculator'a bağlanılıyor..."
-            )
-
-            page.goto(
-                CALCULATOR_URL,
-                wait_until="domcontentloaded",
-                timeout=60000,
-            )
-
-            print(
-                "Bağlantı başarılı."
-            )
-
-            page.wait_for_timeout(
-                1500
-            )
-
-            dismiss_popups(
-                page
-            )
-
-            wait_until_calculator_ready(
-                page
-            )
-
-            print(
-                "Calculator hazır."
-            )
-
-            # --------------------------------------------
-            # TEST PARAMETRELERİ
-            # --------------------------------------------
-
-            select_software(
-                page,
-                "Axxon One (x64)",
-            )
-
-            select_calculation_type(
-                page,
-                "Server",
-            )
-
-            set_camera_count(
-                page,
-                20,
-            )
-
-            set_archive_days(
-                page,
-                45,
-            )
-            set_resolution(
-                page,
-                "1920x1080",
-            )
-
-            set_fps(
-                page,
-                15,
-            )
-
-            set_codec(
-                page,
-                "H264",
-            )
-
-            # Bitrate'i en son değiştiriyoruz.
-            # Resolution/FPS/Codec değişiklikleri bitrate'i
-            # otomatik etkileyebileceği için bu sıra önemli.
-            set_bitrate(
-                page,
-                2.5,
-            )
-            # Hesaplamanın güncellenmesi için kısa bekleme.
-            page.wait_for_timeout(
-                2000
-            )
-
-            print_first_result(
-                page
-            )
+            raise
 
         finally:
             browser.close()
 
+            logger.perf(
+                "Platform Calculator toplam çalışma süresi: "
+                f"{time.perf_counter() - total_start:.3f}s"
+            )
+
+
+# ============================================================
+# MANUEL TEST
+# ============================================================
 
 if __name__ == "__main__":
+    try:
+        result = calculate_platform(
+            camera_count=10,
+            archive_days=30,
+            resolution="1920x1080",
+            fps=25,
+            codec="H265",
+            recording_percentage=70,
+        )
 
-    result = calculate_platform(
-        camera_count= 10,
-        archive_days=30,
-        resolution="1920x1080",
-        fps=25,
-        codec="H265",
-        bitrate_mbps=3.33,
-    )
+        _log_system("CALCULATOR SONUCU")
 
-    print("\n")
-    print("=" * 60)
-    print("CALCULATOR SONUCU")
-    print("=" * 60)
+        for key, value in result.items():
+            logger.info(
+                f"{key}: {value}"
+            )
 
-    for key, value in result.items():
-        print(
-            f"{key}: {value}"
+    except Exception as error:
+        logger.error(
+            f"Test başarısız: {error}"
         )
