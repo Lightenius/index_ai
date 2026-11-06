@@ -6,9 +6,11 @@ from datetime import datetime
 # Custom log levels
 SYSTEM_LEVEL = 25
 PERF_LEVEL = 22
+MESSAGE_LEVEL = 23
 
 logging.addLevelName(SYSTEM_LEVEL, "SYSTEM")
 logging.addLevelName(PERF_LEVEL, "PERF")
+logging.addLevelName(MESSAGE_LEVEL, "MESSAGE")
 
 
 class AlignedFormatter(logging.Formatter):
@@ -20,6 +22,7 @@ class AlignedFormatter(logging.Formatter):
         'DEBUG': '\033[36m',      # Cyan
         'INFO': '\033[32m',       # Green
         'PERF': '\033[1;36m',     # Bold Cyan
+        'MESSAGE': '\033[93m',    # Light yellow
         'SYSTEM': '\033[35m',     # Magenta
         'WARNING': '\033[33m',    # Yellow
         'ERROR': '\033[31m',      # Red
@@ -28,7 +31,7 @@ class AlignedFormatter(logging.Formatter):
     }
 
     # Log levels where the full output line should be colored
-    FULL_LINE_COLOR_LEVELS = {'SYSTEM', 'PERF', 'ERROR', 'CRITICAL'}
+    FULL_LINE_COLOR_LEVELS = {'SYSTEM', 'PERF', 'MESSAGE', 'ERROR', 'CRITICAL'}
 
     def format(self, record):
         dt_str = self.formatTime(record, self.datefmt)
@@ -115,6 +118,11 @@ class Logger:
     def system(cls, message, *args, **kwargs):
         """Custom log level for infrastructure/system events."""
         cls._get_logger().log(SYSTEM_LEVEL, message, *args, **kwargs, extra={'use_color': True})
+
+    @classmethod
+    def msg(cls, message, *args, **kwargs):
+        """Log a message in light yellow."""
+        cls._get_logger().log(MESSAGE_LEVEL, message, *args, **kwargs, extra={'use_color': True})
 
     @classmethod
     def warning(cls, message, *args, **kwargs):

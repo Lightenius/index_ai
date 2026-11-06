@@ -2,17 +2,18 @@
 import re
 import time
 
+from logger import Logger
 from urllib import response
 
 import ollama
 
 
 # TODO: implement the function to call the LLM model using ollama. send only the query given
-def ask_direct_llm(query: str) -> str:
+def ask_direct_llm(query: str, llm_name = "qwen3:8b") -> str:
     start_time = time.perf_counter()
 
     output = ollama.chat(
-                                    model="qwen3:4b",
+                                    model=llm_name,
                                     messages=[
                                         {
                                             "role": "user",
@@ -39,7 +40,7 @@ def ask_direct_llm(query: str) -> str:
     clean_output = re.sub(r".*?</think>", "", raw_output, flags=re.DOTALL).strip()
     response = clean_output if clean_output else raw_output
 
-    print(f"Time taken for LLM response: {end_time - start_time:.6f} seconds")
+    Logger.perf(f"Time taken for LLM response: {end_time - start_time:.6f} seconds")
     print (response)
     return response + "\n\nTime taken for LLM response: {:.6f} seconds".format(end_time - start_time)
 

@@ -69,6 +69,18 @@ def query(text: str, n: int = 10) -> List[int]:
     results = es.find_embedding(vector=embeded_query, n=n)
     return results
 
+def run_embedding():
+    Logger.system("Starting embedding module.")
+    start_time = time.perf_counter()
+
+    if not embed_pdf("data/raw_manual.pdf", embedding_model=EM, db_path="data/pdf_data.db", overwrite=True):
+        Logger.critical("Embedding process failed.")
+        sys.exit(1)
+
+    end_time = time.perf_counter()
+    Logger.perf(f"Embedding run completed in {end_time - start_time:.3f} seconds.")
+    
+
 if __name__ == "__main__":
     Logger.system("This is a test run of the embedding module.")
     start_time = time.perf_counter()
