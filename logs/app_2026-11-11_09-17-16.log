@@ -1,0 +1,56 @@
+[35m2026-11-11 09:17:16 | SYSTEM   | Starting the application...[0m
+2026-11-11 09:17:17 | [32mINFO    [0m | Telegram I/O started.
+[93m2026-11-11 09:19:23 | MESSAGE  | .hesapla 500 kameralı bir tesiste 60 gün kayıt süresi için nasıl bir altyapıya ihtiyacımız var[0m
+2026-11-11 09:19:23 | [32mINFO    [0m | Input identified as a calculation request.
+2026-11-11 09:19:23 | [32mINFO    [0m | Sending message to LLM (qwen3:8b). Awaiting response.
+[1;36m2026-11-11 09:20:02 | PERF     | Time taken for LLM response: 39.228247 seconds[0m
+2026-11-11 09:20:02 | [36mDEBUG   [0m | LLM output for parsing calculation input: {"camera_count": 500, "archive_days": 60, "resolution": "1920x1080", "fps": 25, "codec": "H.265", "recording_percentage": 70}
+
+Time taken for LLM response: 39.228247 seconds
+[35m2026-11-11 09:20:02 | SYSTEM   | Axxon Platform Calculator başlatılıyor.[0m
+[1;36m2026-11-11 09:20:07 | PERF     | Calculator sayfa yükleme süresi: 3.802s[0m
+2026-11-11 09:20:09 | [32mINFO    [0m | Accept geçildi (1).
+2026-11-11 09:20:10 | [32mINFO    [0m | Accept geçildi (2).
+2026-11-11 09:20:11 | [32mINFO    [0m | Calculator hazır.
+2026-11-11 09:20:11 | [32mINFO    [0m | Software seçildi: Axxon One (x64)
+2026-11-11 09:20:12 | [32mINFO    [0m | Calculation type seçildi: Server
+2026-11-11 09:20:14 | [32mINFO    [0m | Kamera sayısı: 10 -> 500
+2026-11-11 09:20:15 | [32mINFO    [0m | Archive days: 30 -> 60
+2026-11-11 09:20:17 | [32mINFO    [0m | Günlük kayıt yüzdesi: 50% -> 70%
+2026-11-11 09:20:18 | [32mINFO    [0m | Resolution: 2688x1520 -> 1920x1080
+2026-11-11 09:20:19 | [32mINFO    [0m | FPS: 25.0 -> 25.0
+2026-11-11 09:20:19 | [32mINFO    [0m | Codec zaten seçili: H265
+2026-11-11 09:20:22 | [32mINFO    [0m | Site tarafından hesaplanan bitrate: 1.67 Mbit/s
+[1;36m2026-11-11 09:20:22 | PERF     | Calculator parametre giriş süresi: 11.338s[0m
+[1;36m2026-11-11 09:20:22 | PERF     | Calculator sonuç okuma süresi: 0.014s[0m
+[35m2026-11-11 09:20:22 | SYSTEM   | Platform hesabı başarıyla tamamlandı.[0m
+[1;36m2026-11-11 09:20:22 | PERF     | Platform Calculator toplam çalışma süresi: 19.995s[0m
+2026-11-11 09:20:22 | [32mINFO    [0m | Sending message to LLM (qwen3:4b). Awaiting response.
+[1;36m2026-11-11 09:20:35 | PERF     | Time taken for LLM response: 13.454929 seconds[0m
+[93m2026-11-11 09:23:49 | MESSAGE  | .hesapla 500 kameralı bir tesiste 60 gün kayıt süresi için nasıl bir altyapıya ihtiyacımız var[0m
+2026-11-11 09:23:49 | [32mINFO    [0m | Input identified as a calculation request.
+2026-11-11 09:23:49 | [32mINFO    [0m | Sending message to LLM (qwen3:8b). Awaiting response.
+[1;36m2026-11-11 09:23:50 | PERF     | Time taken for LLM response: 1.172415 seconds[0m
+2026-11-11 09:23:50 | [36mDEBUG   [0m | LLM output for parsing calculation input: {"camera_count": 500, "archive_days": 60, "resolution": "1920x1080", "fps": 25, "codec": "H.265", "recording_percentage": 70}
+
+Time taken for LLM response: 1.172415 seconds
+[35m2026-11-11 09:23:50 | SYSTEM   | Axxon Platform Calculator başlatılıyor.[0m
+[1;36m2026-11-11 09:23:52 | PERF     | Calculator sayfa yükleme süresi: 1.054s[0m
+2026-11-11 09:23:53 | [32mINFO    [0m | Accept geçildi (1).
+2026-11-11 09:23:54 | [32mINFO    [0m | Accept geçildi (2).
+2026-11-11 09:23:55 | [32mINFO    [0m | Calculator hazır.
+2026-11-11 09:23:55 | [32mINFO    [0m | Software seçildi: Axxon One (x64)
+2026-11-11 09:23:56 | [32mINFO    [0m | Calculation type seçildi: Server
+2026-11-11 09:23:58 | [32mINFO    [0m | Kamera sayısı: 10 -> 500
+2026-11-11 09:23:59 | [32mINFO    [0m | Archive days: 30 -> 60
+2026-11-11 09:24:01 | [32mINFO    [0m | Günlük kayıt yüzdesi: 50% -> 70%
+2026-11-11 09:24:02 | [32mINFO    [0m | Resolution: 2688x1520 -> 1920x1080
+2026-11-11 09:24:03 | [32mINFO    [0m | FPS: 25.0 -> 25.0
+2026-11-11 09:24:03 | [32mINFO    [0m | Codec zaten seçili: H265
+2026-11-11 09:24:06 | [32mINFO    [0m | Site tarafından hesaplanan bitrate: 1.67 Mbit/s
+[1;36m2026-11-11 09:24:06 | PERF     | Calculator parametre giriş süresi: 11.309s[0m
+[1;36m2026-11-11 09:24:06 | PERF     | Calculator sonuç okuma süresi: 0.015s[0m
+[35m2026-11-11 09:24:06 | SYSTEM   | Platform hesabı başarıyla tamamlandı.[0m
+[1;36m2026-11-11 09:24:06 | PERF     | Platform Calculator toplam çalışma süresi: 15.745s[0m
+2026-11-11 09:24:06 | [32mINFO    [0m | Sending message to LLM (qwen3:4b). Awaiting response.
+[1;36m2026-11-11 09:24:50 | PERF     | Time taken for LLM response: 43.819364 seconds[0m

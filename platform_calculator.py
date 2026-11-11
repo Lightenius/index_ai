@@ -1,5 +1,6 @@
 import re
 import time
+from pathlib import Path
 
 from logger import Logger
 from playwright.sync_api import (
@@ -808,6 +809,64 @@ def parse_first_result(page: Page) -> dict:
     }
 
 
+
+# ============================================================
+# XLS EXPORT
+# ============================================================
+
+def save_calculator_xls(page: Page, directory: str | Path) -> Path:
+    """
+    Axxon Platform Calculator'ın kendi XLS export butonunu kullanarak
+    mevcut hesaplama sonucunu belirtilen klasöre kaydeder.
+
+    Args:
+        page: Hesaplama sonuçlarının açık olduğu Playwright sayfası.
+        directory: XLS dosyasının kaydedileceği klasör.
+
+    Returns:
+        Kaydedilen XLS dosyasının tam yolu.
+
+    Raises:
+        OSError: Klasör oluşturulamaz veya dosya kaydedilemezse.
+        PlaywrightError: XLS indirme işlemi başlatılamazsa.
+        RuntimeError: İndirme sonucunda geçerli bir dosya adı alınamazsa.
+    """
+    target_directory = Path(directory).expanduser()
+    target_directory.mkdir(parents=True, exist_ok=True)
+
+    # HTML'deki gerçek "Save as XLS" butonu:
+    # results:results:j_id_sp:createExcel
+    export_button = page.locator(
+        '[id="results:results:j_id_sp:createExcel"]'
+    )
+    export_button.wait_for(
+        state="visible",
+        timeout=15000,
+    )
+
+    with page.expect_download(timeout=60000) as download_info:
+        export_button.click()
+
+    download = download_info.value
+    filename = Path(download.suggested_filename).name
+
+    if not filename:
+        raise RuntimeError(
+            "Calculator XLS indirmesi dosya adı döndürmedi."
+        )
+
+    destination = target_directory / filename
+    download.save_as(str(destination))
+
+    if not destination.is_file() or destination.stat().st_size == 0:
+        raise RuntimeError(
+            f"XLS dosyası kaydedilemedi veya boş: {destination}"
+        )
+
+    logger.info(f"XLS dosyası kaydedildi: {destination}")
+    return destination
+
+
 # ============================================================
 # ANA HESAPLAMA
 # ============================================================
@@ -822,6 +881,7 @@ def calculate_platform(
     software: str = "Axxon One (x64)",
     calculation_type: str = "Server",
     recording_percentage: int = 50,
+    save_xls_to: str | Path | None = None,
 ) -> dict:
     """
     AxxonSoft Platform Calculator'ı headless browser ile çalıştırır
@@ -833,6 +893,8 @@ def calculate_platform(
     - Bitrate her zaman calculator'ın Resolution/FPS/Codec'e göre
       kendi hesapladığı değer olarak okunur.
     - recording_percentage 0-100 arasında ayarlanabilir.
+    - save_xls_to verilirse calculator'ın XLS çıktısı bu klasöre kaydedilir.
+      None ise XLS indirme işlemi yapılmaz.
     """
     total_start = time.perf_counter()
 
@@ -973,6 +1035,15 @@ def calculate_platform(
                 "Calculator sonuç okuma süresi: "
                 f"{time.perf_counter() - result_start:.3f}s"
             )
+
+            # XLS export isteğe bağlıdır; mevcut hesaplama akışını
+            # ve result dictionary yapısını değiştirmez.
+            if save_xls_to is not None:
+                xls_path = save_calculator_xls(
+                    page=page,
+                    directory=save_xls_to,
+                )
+                logger.info(f"XLS export tamamlandı: {xls_path}")
 
             _log_system(
                 "Platform hesabı başarıyla tamamlandı."
