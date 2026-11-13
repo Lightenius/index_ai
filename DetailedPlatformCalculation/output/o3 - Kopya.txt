@@ -1,0 +1,41 @@
+Camera System Proposal
+======================
+
+Total cameras: 118
+Proposed servers: 3
+
+Server allocation
+-----------------
+
+Server 1: 40 cameras
+  Processor: Intel Xeon Platinum 8358 (2600 MHz)
+  CPU load: 70-80
+  Camera groups:
+    - İç ortam IP kamera: 40 cameras
+
+Server 2: 40 cameras
+  Processor: Intel Xeon Platinum 8358 (2600 MHz)
+  CPU load: 70-80
+  Camera groups:
+    - İç ortam IP kamera: 40 cameras
+
+Server 3: 38 cameras
+  Processor: Intel Xeon Platinum 8358 (2600 MHz)
+  CPU load: 70-80
+  Camera groups:
+    - İç ortam IP kamera: 20 cameras
+    - Dış ortam IP kamera: 18 cameras
+
+Platform alternatives
+---------------------
+- Intel Xeon Platinum 8358 (2600 MHz): 11 server(s); CPU load 70-80; RAM 2 x 8GB; storage Archive size: 11.04 TB; recording rate 35.7 Mbit/s; LAN in/out 43.7 / 8.0 Mbit/s
+- Intel Core Ultra 5 245: 17 server(s); CPU load 70-80; RAM 2 x 4GB; storage Archive size: 7.15 TB; recording rate 23.1 Mbit/s; LAN in/out 28.3 / 5.2 Mbit/s
+- Intel Core i5-14600: 26 server(s); CPU load 70-80; RAM 2 x 4GB; storage Archive size: 4.67 TB; recording rate 15.1 Mbit/s; LAN in/out 18.5 / 3.4 Mbit/s
+
+Selection rationale
+-------------------
+The infrastructure model separates VMS servers from recording servers. VMS servers handle video management and GPU-based detector workloads, while recording servers handle camera recording only. The VMS servers are equipped with GPUs to support the detector workloads, and the recording servers are assigned cameras without GPUs. The cameras are distributed as evenly as possible across the servers to ensure balanced load.
+
+Assumptions
+-----------
+- The total camera count is 118, derived from the source camera groups.

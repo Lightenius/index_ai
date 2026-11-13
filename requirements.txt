@@ -1,3 +1,4 @@
 PyMuPdf
 streamlit
 torchvision
+ollama

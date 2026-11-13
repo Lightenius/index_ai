@@ -1,0 +1,90 @@
+Infrastructure model: the system uses separate VMS and recording tiers. Recording servers own and record every camera. VMS servers receive streams from recording servers for viewing and detector processing; no camera is moved from or counted separately from its recording-server allocation.
+
+Camera System Proposal
+======================
+
+Specification loaded at runtime: C:\Users\axxon1\Desktop\ai.git\DetailedPlatformCalculation\specification.ai
+Total camera count: 118
+Camera groups:
+- İç ortam IP kamera: 100 cameras
+- Dış ortam IP kamera: 18 cameras
+
+VMS servers: 1
+VMS server specifications
+--------------------------
+
+VMS Server 1: 0 cameras assigned (receives detector feeds)
+  Processor: Intel Core i3-14100
+  CPU load: 50-60
+  RAM: 32 GB minimum (workbook baseline: 2 x 8GB; upgrade required)
+  GPU: Nvidia RTX 2000 Ada Generation (16GB)
+  Workbook RAM baseline: 2 x 8GB
+  Detector feeds (not camera assignments):
+    - Dış ortam IP kamera: 18 camera streams for Face detector VA (GPU)
+  Detector workloads:
+    - Face detector VA (GPU): 18 detector instances
+
+Recording servers: 2
+Recording server specifications
+--------------------------------
+
+Recording Server 1: 59 cameras
+  Processor: Intel Core i3-14100
+  CPU load: 50-60
+  RAM: 2 x 8GB
+  GPU: -
+  Camera groups:
+    - İç ortam IP kamera: 59
+
+Recording Server 2: 59 cameras
+  Processor: Intel Core i3-14100
+  CPU load: 50-60
+  RAM: 2 x 8GB
+  GPU: -
+  Camera groups:
+    - İç ortam IP kamera: 41
+    - Dış ortam IP kamera: 18
+
+Selection and resource explanations
+------------------------------------
+Selected the listed recording-server processor with the highest upper CPU-load range; ties are resolved by the workbook's first-listed option. The same recommended platform supplies the VMS processor and baseline RAM; VMS RAM is increased to the required 32 GB minimum when the workbook baseline is lower.
+Recording-server count is the minimum needed for the loaded specification's per-server limit; 118 cameras are distributed as evenly as possible across 2 recording servers.
+The calculator recommends 1 detector GPU(s); the VMS tier has at least one server per recommended GPU. A VMS server without a detector GPU receives an NVIDIA GTX 1650.
+Recording servers retain ownership of all camera groups and have no GPUs. VMS entries show received detector streams, not camera allocations.
+
+Recording processor alternatives
+-------------------------------
+- Intel Xeon Silver 4310 (2100 MHz): CPU load 40-50; RAM 2 x 8GB
+- Intel Core Ultra 5 225: CPU load 30-40; RAM 2 x 8GB
+- Intel Xeon Silver 4510 (2400 MHz): CPU load 30-40; RAM 2 x 8GB
+
+RAM situation
+--------------
+The loaded specification requires at least 8 GB RAM per server.
+Recording-server RAM is 2 x 8GB (16 GB total per server); it meets the minimum.
+VMS RAM is proposed at or above the 32 GB minimum using the workbook baseline.
+
+Storage and RAID
+-----------------
+Required video archive: 242.83 TB
+Recommended-platform archive-size result: 242.83 TB for the calculator's sized workload.
+Recommended-platform RAID: RAID 5
+Configured calculator RAID control: RAID 5
+Archive retention: 60.0 days at 100.0% of the day.
+Configured disk size: 16.0 TB
+Maximum disks per RAID group: 18
+Global recommended RAID/storage configuration (selected independently of processor): HDD: 18x 16 TB (1x RAID 5)
+Proposed raw HDD capacity: 18 x 16.0 TB = 288.0 TB
+Proposed nominal usable capacity: 272.0 TB.
+Nominal RAID 5 capacity subtracts one parity disk per global RAID group (1 group(s)); it excludes formatting and filesystem overhead.
+Calculator-reported HDD marked capacity for the global configuration: 267.0 TB.
+Global RAID layout: 1 RAID group(s), 18 disks total.
+The calculator-reported HDD marked capacity differs from the nominal estimate for the global RAID configuration; both values are shown because the export does not reconcile them.
+Usable capacity meets the reported archive requirement.
+The single global RAID configuration is selected from the storage configurations listed in Recommended platforms, independently of processor selection; it is not multiplied or assigned per server. Usable-capacity estimates account for the listed RAID groups and exclude formatting/filesystem overhead.
+
+Assumptions and unavailable specifications
+-------------------------------------------
+- VMS processor and baseline RAM come from the selected Recommended platforms row; any RAM increase to the VMS minimum is explicitly identified.
+- The recommended storage/RAID option is treated as one global configuration, independent of the selected processor and recording-server count.
+- Calculator storage and GPU values are recommendations, not guaranteed performance or capacity.

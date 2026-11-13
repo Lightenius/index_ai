@@ -1,0 +1,42 @@
+ Kayıt sunucusu sayısını belirle.
+ 60-65 kamera başına bir sunucu.
+
+ Disk sayısı, kapasitesi, adedi
+ İşlemci tipi
+ Ram miktarı
+
+ Workstationlar için de ekran kartı 
+tipi ve sayısı belirlenecek.
+ 3 Monitör destekleyecek ekran kartı şart
+ Ek olarak eğer dedektör çalıştırılacaksa
+bunlar da hesaba katılmalı.
+
+
+specs.ai
+
+there will be 2 types of servers: recording server, vms server.
+recording servers does not have GPUs. They only have CPUs.
+A recording server can have at max 60 cameras.
+Each server must have at least 8 gigabytes of ram
+If no GPU is needed by the detectors, give each vms server a Nvidia GTX 1650 GPU
+IF detectors need GPUs, distribute the GPUs to vms servers, then give the remaining Nvidia GTX 1650 GPU
+If the vms server count is less than detector's required GPU count. Make sure we have enough VMS servers to run each gpu (1 VMS server per gpu) then distribute the cameras equally between them.
+Briefly explain your selection of GPUs, VMS/recording server count and camera distribution.
+VMS servers get their processor and ram specs from the file provided to you as input.
+Explain the current RAID configuration briefly.
+Note total space needed, total space we will have with the given configuration.
+Add a brief explanation of the RAM situation.
+Explicitly explain the infrastructure model you created at the start.
+At least have 1 VMS server.
+At least have 1 recording server.
+VMS servers scale with detectors and required GPUs. Most of the time there will be 1 VMS server and multiple recording servers (For example if no detectors are needed)
+Recording servers scale with camera count. New server for each 60 cameras (approxiamtely. if there are 90 cameras it should be 45 - 45, if there are 150 cameras it should be 3 recording servers with 50 - 50 - 50 spread)
+
+Write in the report:
+How many VMS servers are there. What are the specifications of the vms servers.
+How many recording servers are there. What are the specifications of the recording servers.
+Total Camera Count.
+Camera Groups.
+Camera count per recording server.
+Storage requirement and proposed storage space.
+RAID configuration. Alternate options.

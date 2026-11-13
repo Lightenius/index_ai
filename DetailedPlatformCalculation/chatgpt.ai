@@ -1,0 +1,103 @@
+peki. şimdi sen sayfayı inceledin. eğer her girdinin bir template'e uyacağından emin olabilirsek, bu scripti farklı kamera grupları ekleyip bu gruplara dedektörler atayacak şekilde de çalıştırabilir miyiz? Örneğin ben diyorum ki "60 kamera, 20sinde yüz tanıma, 10'unda yangın tespiti. 3 kamera grubu oluşturuyor. 1. grup 20 kamera, yüz tanıma; 2. grup 10 kamera, yangın tespiti; 3. grup 30 kamera, jenerik.
+
+bu gruplara mümkün olduğunda GPU ile yapılacak şekilde seçilen dedektörleri atıyor ve xls dosyasını kaydediyor. Bunu ayrı bir dosya olarak bana vermeni isteyeceğim. Şimdilik standalone bir şey olacak bu.
+
+14s düşündü
+Evet, bunu ayrı ve bağımsız bir Python scripti olarak yapabiliriz. Hatta verdiğin örnek, mevcut tek kamera grubu yaklaşımını genişletmek için oldukça uygun.
+
+Ancak burada iki farklı işi birbirinden ayırmamız gerekiyor:
+
+Kamera gruplarını oluşturmak ve dedektör atamak: Playwright ile Calculator arayüzünde yapılacak işlemler.
+
+Dedektörlerin GPU/CPU kullanımını optimize etmek: Calculator'ın sunduğu donanım ve işlemci seçeneklerine göre yapılacak seçim.
+
+İlk kısmın otomasyonu teknik olarak mümkün görünüyor. İkinci kısımda ise Calculator'ın gerçekten hangi dedektörleri GPU üzerinde çalıştırabildiğini ve bu seçeneği nasıl sunduğunu doğrulamamız gerekiyor. GPU seçeneği olmayan bir dedektörü otomatik olarak GPU'ya atadığımızı varsayamayız.
+
+Önerdiğim çalışma modeli
+Senin örneğini şu şekilde temsil edebiliriz:
+
+Toplam: 60 kamera
+
+Grup 1 — Yüz tanıma
+
+20 kamera
+20 kamera · Yüz tanıma dedektörü
+
+Grup 2 — Yangın tespiti
+
+10 kamera
+10 kamera · Yangın tespiti dedektörü
+
+Grup 3 — Genel
+
+30 kamera
+30 kamera · Ek dedektör yok
+
+Kamera toplamı
+
+60
+Scriptin girdisi mümkün olduğunca yapılandırılmış olmalı. Örneğin:
+
+configuration = {
+    "archive_days": 60,
+    "resolution": "1920x1080",
+    "fps": 25,
+    "codec": "H264",
+    "recording_percentage": 100,
+
+    "groups": [
+        {
+            "name": "Yüz Tanıma",
+            "camera_count": 20,
+            "detectors": ["Face Recognition"]
+        },
+        {
+            "name": "Yangın Tespiti",
+            "camera_count": 10,
+            "detectors": ["Fire Detection"]
+        },
+        {
+            "name": "Genel",
+            "camera_count": 30,
+            "detectors": []
+        }
+    ],
+
+    "save_xls_to": "./calculations"
+}
+
+Bu yapı sayesinde her kamera grubuna ayrı çözünürlük, FPS, codec ve kayıt yüzdesi gibi özellikler de ileride eklenebilir.
+
+Otomasyonun izleyeceği sıra
+Calculator açılır ve genel yazılım/hesaplama ayarları yapılır.
+
+İlk kamera grubu düzenlenir.
+
+Diğer kamera grupları arayüzden eklenir.
+
+Her grubun kamera sayısı ve dedektörleri atanır.
+
+Dedektörlerin GPU/CPU çalışma tercihleri, Calculator'ın desteklediği seçeneklere göre belirlenir.
+
+Girdi doğrulaması yapılır: Grup kamera sayılarının toplamı 60 olmalı.
+
+Hesaplama tamamlanır ve XLS indirilir.
+
+Dikkat etmemiz gereken teknik konu
+Mevcut platform_calculator.py kodunda kamera grubu alanlarının ID'leri cameraGroupPanel:0 ile başlıyor. Yani şu anki kod yalnızca ilk grubu düzenliyor. Yeni scriptte bu sabit indeksleri kullanamayız. Grup indekslerini dinamik belirlememiz gerekecek.
+
+Ayrıca dedektörlerin her biri için şu bilgileri çıkarmalıyız:
+
+Calculator'daki gerçek adı ve seçim alanı.
+
+Hangi kamera grubuna atanabildiği.
+
+GPU desteği olup olmadığı.
+
+GPU seçiminin otomatik mi, manuel mi yapıldığı.
+
+Birden fazla dedektörün aynı grupta kullanılmasına izin verilip verilmediği.
+
+Benim önerim: Bu yeni scripti mevcut platform_calculator.py dosyasından bağımsız tutalım. Kendi Playwright oturumunu açsın, kendi girdisini doğrulasın, grupları oluştursun ve XLS'i indirsin. Telegram botuna veya mevcut hesaplama akışına hiçbir bağımlılığı olmasın.
+
+Böylece daha sonra mevcut projeye entegre etmek de kolay olur. Şu an için tasarım açısından doğru yöndeyiz; yalnızca dedektör ve GPU kontrollerinin gerçek arayüz karşılıklarını kesinleştirmeden otomasyonu tamamlanmış kabul etmemeliyiz.

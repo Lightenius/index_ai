@@ -1,0 +1,25 @@
+{
+      "archive_days": 60,
+      "recording_percentage": 100,
+      "resolution": "1920x1080",
+      "fps": 25,
+      "codec": "H264",
+      "gpu_detectors": [],
+      "groups": [
+        {
+          "name": "Face cameras",
+          "camera_count": 20,
+          "detectors": ["facial_recognition"]
+        },
+        {
+          "name": "Fire cameras",
+          "camera_count": 10,
+          "detectors": ["fire_detection"]
+        },
+        {
+          "name": "General cameras",
+          "camera_count": 30,
+          "detectors": []
+        }
+      ]
+    }

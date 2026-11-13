@@ -1,0 +1,39 @@
+Infrastructure proposal and reporting rules:
+
+1. Begin every report with a brief, explicit explanation of the infrastructure model: separate VMS servers from recording servers. Recording servers own and record all cameras. VMS servers receive camera streams from recording servers for viewing and detector processing; cameras are never reassigned from recording servers to VMS servers.
+2. Always propose at least one VMS server and at least one recording server.
+3. Recording servers own and record all cameras, including cameras whose streams are analyzed by detectors. Recording servers must not be assigned GPUs. Each recording server must support no more than 60 cameras. Choose the minimum recording-server count that supports the total camera count, then distribute cameras as evenly as possible across those servers. Examples: 90 cameras use 2 recording servers with 45 cameras each; 150 cameras use 3 recording servers with 50 cameras each. Preserve each camera group's total exactly; groups may be split across recording servers.
+4. VMS servers handle video management, viewing, and detector workloads on streams received from recording servers. VMS server count must be sufficient for the required GPUs: if detectors require N GPUs, provide at least N VMS servers, with one required detector GPU assigned to each VMS server. Add VMS servers as needed when multiple required GPUs must be placed on separate servers. If no detector requires a GPU, provide one VMS server. Show detector source groups as received feeds for VMS processing only; do not allocate, move, subtract, or count these cameras as VMS-hosted cameras.
+5. If no detector requires a GPU, equip each VMS server with one NVIDIA GTX 1650. If detectors require GPUs, first assign the required GPU models and quantities to VMS servers, then equip each VMS server that has no assigned detector GPU with one NVIDIA GTX 1650. Do not assign GPUs to recording servers.
+6. VMS server processor and RAM specifications must come from the Platform Calculator workbook's "Recommended platforms" table. Use a listed processor model and its CPU-load range; never report a zero or missing CPU value when the table supplies a recommendation.
+7. Recording servers must have at least 16 GB of RAM, configured as 2 x 8 GB minimum. VMS servers must have at least 32 GB RAM. Use the recommended-platform RAM as the baseline. If it is below the applicable minimum, explicitly state the workbook recommendation and that RAM must be upgraded to the minimum; never present the lower baseline as the proposed RAM or silently change it. Report recording and VMS RAM separately and check the applicable minimums. Do not invent a RAM type that the workbook does not specify.
+8. Use only processor models from the Intel Xeon Silver, Intel Core Ultra, or Intel Xeon Gold product lines. Exclude all other processor models, including standard Intel Core processors, from processor selection and alternatives. Use the Platform Calculator workbook's "Recommended platforms" table as the source for processor recommendations. Select the weakest eligible listed processor for recording servers by comparing CPU-load ranges for the same workload: the highest CPU-load range is the weakest. If tied, use the first listed option. Use the exact processor model name. Include the other eligible offered processor options as alternatives; do not invent models.
+9. Select one RAID/storage configuration from the configurations listed across the workbook's "Recommended platforms" table, including continuation rows. Select it independently of the processor recommendation; processor models and RAID configurations are not paired. Treat the selected RAID/storage configuration as one global configuration, not as a configuration assigned to or multiplied across each server. Report the workbook's calculated storage requirement and the selected global configuration. Calculate raw and usable capacity only when the disk count, disk size, RAID groups, and parity/mirroring are explicit. If those facts are insufficient or the selected global configuration conflicts with the configured archive controls, identify the discrepancy rather than guessing.
+10. Briefly explain the selected global RAID configuration. List alternative RAID/storage configurations only if the workbook lists them; do not invent alternatives or imply RAID level alone guarantees a particular usable capacity. Do not assign or calculate RAID separately for each server.
+11. Explain the RAM situation briefly, including the 8 GB minimum and any specification gaps.
+12. The report must include:
+    - The infrastructure model and a brief explanation of the selection of VMS servers, recording servers, GPUs, and camera distribution.
+    - Total camera count and all camera groups.
+    - Number of VMS servers, and the processor, CPU load, RAM recommendation and any required upgrade, GPU, and detector/feed assignments for each. VMS camera count is zero; received detector feeds are not camera allocations.
+    - Number of recording servers, and the processor, RAM, and camera count/group allocation for each.
+    - Storage requirement, proposed raw and usable storage space when calculable, the single global RAID configuration, and workbook-listed alternatives.
+    - Brief explanations of the GPU selection, server counts and distribution, RAID configuration, and RAM situation.
+    - Brief explanations the detectors that will run in the system.
+13. Preserve every source camera count and group exactly in the recording tier. VMS detector feed counts may reference those same source cameras solely to describe streams processed; label them as feeds, not camera assignments, and never add them again to the camera total.
+14. Use only processor, RAM, GPU, storage, and RAID facts found in the input file or calculator workbook. Clearly state assumptions and unavailable specifications; never fabricate hardware capabilities, prices, capacity, or performance.
+15. Use the following format to describe servers:
+Recording Server x: n cameras
+  Processor: <processor_name>
+  CPU load: <cpu_load>
+  RAM: <proposed_ram>
+  GPU: -
+  Camera groups:
+    - <cam_group_name>: <group_camera_count>
+    ...
+VMS Server x: 0 cameras assigned (receives detector feeds)
+  Processor: <processor_name>
+  CPU load: <cpu_load>
+  RAM: <at least 32 GB, with workbook baseline and upgrade stated>
+  GPU: <proposed_gpu>
+  Detector feeds (not camera assignments):
+    - <cam_group_name>: <feed_camera_count>

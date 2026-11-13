@@ -54,3 +54,5 @@ Time taken for LLM response: 1.172415 seconds
 [1;36m2026-11-11 09:24:06 | PERF     | Platform Calculator toplam çalışma süresi: 15.745s[0m
 2026-11-11 09:24:06 | [32mINFO    [0m | Sending message to LLM (qwen3:4b). Awaiting response.
 [1;36m2026-11-11 09:24:50 | PERF     | Time taken for LLM response: 43.819364 seconds[0m
+2026-11-11 10:23:14 | [32mINFO    [0m | Chat history saved to chat_log
+2026-11-11 10:23:14 | [32mINFO    [0m | Application shutdown complete.

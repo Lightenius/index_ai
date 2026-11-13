@@ -820,7 +820,7 @@ async def parse_first_result(page: Page) -> dict:
 # XLS EXPORT
 # ============================================================
 
-def save_calculator_xls(page: Page, directory: str | Path) -> Path:
+async def save_calculator_xls(page: Page, directory: str | Path) -> Path:
     """
     Axxon Platform Calculator'ın kendi XLS export butonunu kullanarak
     mevcut hesaplama sonucunu belirtilen klasöre kaydeder.
@@ -845,15 +845,15 @@ def save_calculator_xls(page: Page, directory: str | Path) -> Path:
     export_button = page.locator(
         '[id="results:results:j_id_sp:createExcel"]'
     )
-    export_button.wait_for(
+    await export_button.wait_for(
         state="visible",
         timeout=15000,
     )
 
-    with page.expect_download(timeout=60000) as download_info:
-        export_button.click()
+    async with page.expect_download(timeout=60000) as download_info:
+        await export_button.click()
 
-    download = download_info.value
+    download = await download_info.value
     filename = Path(download.suggested_filename).name
 
     if not filename:
@@ -862,7 +862,7 @@ def save_calculator_xls(page: Page, directory: str | Path) -> Path:
         )
 
     destination = target_directory / filename
-    download.save_as(str(destination))
+    await download.save_as(str(destination))
 
     if not destination.is_file() or destination.stat().st_size == 0:
         raise RuntimeError(
@@ -886,7 +886,7 @@ async def calculate_platform(
     bitrate_mbps: float | None = None,
     software: str = "Axxon One (x64)",
     calculation_type: str = "Server",
-    recording_percentage: int = 50,
+    recording_percentage: int = 100,
     save_xls_to: str | Path | None = None,
 ) -> dict:
     """
@@ -1045,7 +1045,7 @@ async def calculate_platform(
             # XLS export isteğe bağlıdır; mevcut hesaplama akışını
             # ve result dictionary yapısını değiştirmez.
             if save_xls_to is not None:
-                xls_path = save_calculator_xls(
+                xls_path = await save_calculator_xls(
                     page=page,
                     directory=save_xls_to,
                 )

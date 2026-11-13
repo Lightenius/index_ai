@@ -1,0 +1,4 @@
+Son gelinen durumda kamera sayılarına göre oluşturulan raporlar başarı ile çalışmaktadır. 
+Nitekim girdi olarak verilen dokümandan detektör tiplerinin tespitinin yapılması konusunda ciddi bir problem var.
+beş denemenin dördünde dedektörler eksik seçilmiştir. Dedektörlerin yanlış seçildiği olmamıştır.
+Yanlış seçimleri elemesi için devreye alınan sistemin doğru seçimleri de elemesi söz konusu olabilir.

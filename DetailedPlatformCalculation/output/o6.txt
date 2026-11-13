@@ -1,0 +1,125 @@
+Tesis adı: HALK BANKASI SÖĞÜTÖZÜ YERLEŞKESİ
+
+Altyapı modeli: Sistem, ayrı VMS ve recording katmanlarından oluşur. Tüm kameralar recording server'lara bağlıdır ve kayıtları burada tutulur. VMS server'lar görüntüleme ve detector işleme için recording server'lardan video akışlarını alır; kameralar VMS server'lara taşınmaz ve burada yeniden sayılmaz.
+
+Kamera Sistemi Önerisi
+======================
+
+Yüklenen şartname: C:\Users\axxon1\Desktop\ai.git\DetailedPlatformCalculation\specification.ai
+Toplam kamera sayısı: 320
+Kamera grupları:
+- İç ortam IP kamera: 185 kamera
+- Ptz Kamera: 8 kamera
+- Dış ortam IP kamera: 127 kamera
+
+VMS server sayısı: 1
+VMS server özellikleri
+-----------------------
+
+VMS Server 1: 0 kamera atanmıştır (detector feed alır)
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: NVIDIA GTX 1650
+  Workbook RAM önerisi: 2 x 16GB
+  Detector feed'leri (kamera ataması değildir):
+    - Yok
+  Detector iş yükleri:
+    - Calculator çıktısında detector bildirilmemiş
+
+Recording server sayısı: 6
+Recording server özellikleri
+-----------------------------
+
+Recording Server 1: 54 kamera
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: Yok
+  Camera groups:
+    - İç ortam IP kamera: 54
+
+Recording Server 2: 54 kamera
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: Yok
+  Camera groups:
+    - İç ortam IP kamera: 54
+
+Recording Server 3: 53 kamera
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: Yok
+  Camera groups:
+    - İç ortam IP kamera: 53
+
+Recording Server 4: 53 kamera
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: Yok
+  Camera groups:
+    - İç ortam IP kamera: 24
+    - Ptz Kamera: 8
+    - Dış ortam IP kamera: 21
+
+Recording Server 5: 53 kamera
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: Yok
+  Camera groups:
+    - Dış ortam IP kamera: 53
+
+Recording Server 6: 53 kamera
+  İşlemci: Intel Xeon Silver 4310 (2100 MHz)
+  CPU yükü: 50-60
+  RAM: 2 x 16GB
+  GPU: Yok
+  Camera groups:
+    - Dış ortam IP kamera: 53
+
+Seçim ve kaynak açıklamaları
+----------------------------
+Recording server'lar için izin verilen Intel Xeon Silver, Intel Core Ultra veya Intel Xeon Gold işlemci ailelerindeki seçenekler değerlendirilmiştir. Aynı iş yükündeki CPU yük aralığı en yüksek olan uygun işlemci en zayıf seçenek kabul edilmiştir; eşitlikte workbook'ta ilk listelenen seçilmiştir. Uygun olmayan işlemci aileleri ve alternatifleri dışarıda bırakılmıştır. VMS server işlemcisi ve başlangıç RAM miktarı da uygun Recommended platforms satırından alınmıştır.
+Şartnamedeki server başına kamera sınırı için gereken en az recording server sayısı kullanılmıştır. 320 kamera, 6 recording server'a mümkün olduğunca eşit dağıtılmıştır.
+Calculator 0 detector GPU önermektedir. Her gerekli GPU için en az bir VMS server bulunur. Detector GPU atanmayan VMS server'lara NVIDIA GTX 1650 verilir.
+Tüm kamera grupları recording server'larda kalır; recording server'lara GPU atanmaz. VMS bölümünde kamera ataması değil, işlenecek video akışları gösterilir.
+
+Recording server işlemci alternatifleri
+----------------------------------------
+- Intel Core Ultra 7 265: CPU yükü 50-60; RAM 2 x 16GB
+- Intel Xeon Gold 6530 (2100 MHz): CPU yükü 50-60; RAM 2 x 16GB
+
+RAM durumu
+-----------
+Şartname her recording server için en az 16 GB RAM gerektirir.
+Recording server başına 32 GB RAM planlanmıştır; workbook önerisi: 2 x 16GB. Öneri, en az 2 x 8 GB (toplam 16 GB) koşulunu karşılar.
+VMS RAM, workbook önerisi dikkate alınarak en az 32 GB planlanmıştır.
+
+Depolama ve RAID
+----------------
+Gerekli video arşivi: 659.12 TB
+Recommended platforms arşiv boyutu: 659.12 TB.
+Recommended platforms RAID: RAID 5
+Calculator RAID ayarı: RAID 5
+Arşiv saklama süresi: 60.0 gün; günlük kayıt oranı: %100.0.
+Calculator disk boyutu: 16.0 TB
+RAID group başına en fazla disk: 18
+Global RAID/depolama yapılandırması (işlemciden bağımsız seçildi): HDD: 49x 16 TB (3x RAID 5)
+Toplam ham HDD kapasitesi: 49 x 16.0 TB = 784.0 TB
+Yaklaşık kullanılabilir kapasite: 736.0 TB.
+Not: Nominal RAID 5 kapasitesi, global RAID düzenindeki 3 group için birer parity diski düşülerek hesaplanmıştır; biçimlendirme ve dosya sistemi kayıpları dahil değildir.
+Global yapılandırma için calculator HDD marked capacity: 724.71 TB.
+Global RAID düzeni: 3 RAID group, toplam 49 disk.
+Calculator tarafından bildirilen HDD marked capacity ile global RAID düzenine göre hesaplanan yaklaşık kapasite farklıdır. Workbook bu farkı açıklamadığından her iki değer de gösterilmiştir.
+Kullanılabilir kapasite gerekli arşiv kapasitesini karşılar.
+Tek bir global RAID yapılandırması, işlemci seçiminden bağımsız olarak Recommended platforms tablosunda listelenen depolama seçeneklerinden seçilmiştir; server başına ayrı RAID atanmaz veya disk sayısı server sayısıyla çarpılmaz. Kullanılabilir kapasite hesabı listelenen RAID group'larını dikkate alır; biçimlendirme ve dosya sistemi kayıpları dahil değildir.
+
+Varsayımlar ve belirtilmeyen özellikler
+----------------------------------------
+- VMS işlemci ve başlangıç RAM bilgisi, izin verilen işlemci ailelerindeki Recommended platforms satırlarından alınmıştır; minimum RAM artışı ayrıca belirtilmiştir.
+- Önerilen depolama/RAID seçeneği, işlemciden ve recording server sayısından bağımsız tek bir global yapılandırmadır.
+- Calculator depolama ve GPU değerleri öneridir; performans veya kapasite garantisi değildir.

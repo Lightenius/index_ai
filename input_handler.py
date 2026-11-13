@@ -11,6 +11,10 @@ import re
 import llm_manager
 from chat_history import ChatHistory
 
+
+DEFAULT_XML_DIR = "./xml_output/"
+
+
 class InputHandler:
     def __init__(self):
         pass
@@ -26,13 +30,20 @@ class InputHandler:
 
 
     def is_calculation_request(self, user_input: str) -> bool:
-
         if user_input.count(".calc") > 0 or user_input.count(".compute") > 0 or user_input.count(".hesap") > 0 or user_input.count(".hesapla") > 0:
             Logger.info("Input identified as a calculation request.")
             return True
         else:
             return False
-        
+
+
+    def is_save_calculation(self, user_input):
+        if user_input.count(".save") != 0 or user_input.count(".kaydet") != 0:
+            Logger.info("XLS files will be saved after calculation")
+            return True
+        else:
+            return False
+
 
     def is_conversation(self, user_input: str) -> bool:
         pass
@@ -48,11 +59,11 @@ class InputHandler:
         archive_days (default 30), 
         resolution (default 1920x1080, always use axb format for resolution. all valid options are as follows: '200x100', '320x240', '400x200', '352x288', '704x288', '640x360', '640x480', '704x480', '704x576', '720x576', '800x600', '1024x768', '1280x720', '1280x960', '1280x1024', '1600x1200', '1920x1080', '2048x1536', '3012x1152', '2560x1440', '2688x1520', '2560x1600', '2048x2048', '2560x1920', '2592x1920', '2592x1944', '2560x2048', '3072x1728', '3072x2048', '2560x2560', '3072x2304', '6400x1200', '3840x2160', '4096x2160', '3072x3072', '3648x2752', '4000x3000', '4000x3072', '5472x3648', '7680x4320', '8192x4320'), 
         fps (default 25; example(value): 12 f (12), 25 (25), 30 fp (30), 60 fps (60), 80 kare (80)), 
-        codec (default H.265, you are allowed to use: H264, H265, MjPEG). 
-        recording_percentage=70 (default 50;; genellikle "kayıt %100(100), 35 kayıt(35), %23 (23), tüm gün kayıt yapılacak (100), günün yarısında kayıt yapılacak (50), kısmi kayıt yapılacak (70) şeklinde bilgi gelebilir.),
+        codec (default H.264, you are allowed to use: H264, H265, MjPEG). 
+        recording_percentage=100 (default 100;; genellikle "kayıt %100(100), 35 kayıt(35), %23 (23), tüm gün kayıt yapılacak (100), günün yarısında kayıt yapılacak (50), kısmi kayıt yapılacak (70) şeklinde bilgi gelebilir.),
         return only the dictionary."""
         
-        result = await llm_manager.ask_direct_llm_async(prompt)
+        result = await llm_manager.ask_direct_llm_async(prompt, llm_name="qwen3:4b")
         # validate result is a valid dictionary
 
         try:
@@ -76,6 +87,8 @@ class InputHandler:
             Logger.error("Sending error message to user.")
             
             return None
+
+        XML_path = None if not self.is_save_calculation(user_input=user_input) else DEFAULT_XML_DIR
         
         
         platform_result = await platform_calculator.calculate_platform(
@@ -85,6 +98,7 @@ class InputHandler:
             fps=parsed_input.get("fps", 25),
             codec=parsed_input.get("codec", "H.265"),
             recording_percentage=parsed_input.get("recording_percentage", 50),
+            save_xls_to = XML_path
         )
 
         llm_response = await llm_manager.ask_direct_llm_async(
