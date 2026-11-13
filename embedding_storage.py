@@ -2,6 +2,7 @@
 import sqlite3
 import struct
 import time
+from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -13,6 +14,7 @@ from logger import Logger
 class EmbeddingStorage:
 
     def __init__(self, db_path: str = "./data/pdf_data.db") -> None:
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self.db: sqlite3.Connection = sqlite3.connect(db_path)
 
         self.db.execute("""
@@ -22,7 +24,15 @@ class EmbeddingStorage:
             )
         """)
 
-        
+        if self.db.execute(
+            "SELECT 1 FROM bs WHERE page_number = 0"
+        ).fetchone():
+            self.db.execute(
+                "UPDATE bs SET page_number = -page_number - 1"
+            )
+            self.db.execute(
+                "UPDATE bs SET page_number = -page_number WHERE page_number < 0"
+            )
 
         self.db.commit()
 
@@ -93,3 +103,9 @@ class EmbeddingStorage:
 
     def close(self) -> None:
         self.db.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()

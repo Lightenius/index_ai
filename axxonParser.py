@@ -74,7 +74,7 @@ def get_raw_text_from_pdf(pdf_path):
     return all_text
 
 
-def get_pages(pdf_path) -> List[Dict[str, str]]:
+def get_pages(pdf_path) -> List[Dict[str, object]]:
     try:
         doc = pymupdf.open(pdf_path)
     except Exception as e:
@@ -86,21 +86,11 @@ def get_pages(pdf_path) -> List[Dict[str, str]]:
         text = doc.get_page_text(i)
         pages.append(
             {
-            "page_number": str(i),
+            "page_number": i + 1,
             "content": text.strip()
             }
         )
-
-    # DEBUG
-    i= 0
-    f = open("logs/page_log.txt", "w", encoding="utf-8")
-    for page in pages:
-        i += 1 if i!=0 else 0
-        if i % 10 != 0: continue
-        f.write(f"Page No: {page['page_number']} content: {page['content']}\n\n")
-    f.close()
-    Logger.debug("Saved sample page content to logs/page_log.txt for debugging.")
-
+    doc.close()
     return pages
 
 

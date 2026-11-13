@@ -66,14 +66,19 @@ async def ask_direct_llm_async(
     query: str,
     llm_name: str = "qwen3:8b",
     benchmark: bool = True,
+    system_prompt: str | None = None,
 ) -> str:
     start_time = time.perf_counter()
     Logger.info(f"Sending message to LLM ({llm_name}). Awaiting response.")
 
     async with ollama.AsyncClient() as client:
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": query})
         output = await client.chat(
             model=llm_name,
-            messages=[{"role": "user", "content": query}],
+            messages=messages,
             think=False,
             options={
                 "num_ctx": 8192,

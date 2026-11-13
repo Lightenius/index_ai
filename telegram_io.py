@@ -47,8 +47,7 @@ class TelegramIO:
 
         self.application.add_handler(
             MessageHandler(
-                filters.ChatType.GROUPS
-                & filters.TEXT
+                filters.TEXT
                 & ~filters.COMMAND,
                 self._handle_group_message
             )
@@ -124,7 +123,7 @@ class TelegramIO:
             user_id: Telegram user ID.
         """
         try:
-            if message.count(".doc") != 0: await self.send_message("Dokümanlar kontrol ediliyor.", chat_id=chat_id)
+            await self.send_message("Kaynaklar aranıyor...", chat_id=chat_id)
             output = await self.IH.handle_input(message, chat_id=chat_id)
             if not isinstance(output, str) or not output.strip():
                 Logger.error(
